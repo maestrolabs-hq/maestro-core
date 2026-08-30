@@ -40,7 +40,7 @@ gets a refusal, never a guess.
 | `kind` | `capture` or `recall` |
 | `source.id` | opaque label for the child. Maestro records it and never branches on it |
 | `source.session` | groups captures and anchors the watermark |
-| `project.root` | determines the wing |
+| `project.root` | determines the scope |
 | `material.path` | where the material is. Only for `capture` |
 
 There is deliberately no field naming the event that produced the envelope. A

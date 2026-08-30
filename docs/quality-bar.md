@@ -39,6 +39,7 @@ add `tsc --noEmit` and `node --test` when it holds its first TypeScript.
 | `cargo test` | behaviour |
 | `cargo machete` | dependencies declared but unused |
 | `cargo deny check` | advisories, licences, bans, sources |
+| `cargo test` (vocabulary) | sink names, borrowed vocabulary, retired wording |
 
 `cargo deny` rather than `cargo audit`: it covers advisories *and* licences,
 bans and sources. With an empty dependency list those sections guard against
@@ -99,8 +100,10 @@ free. Nothing is wired. The fast tier is close to a direct translation of
 **Rulesets.** No required checks, no signed commits, no force-push protection.
 Every gate today is local, and a local gate is bypassed by `--no-verify`.
 
-**Documentation gates.** Nothing checks that these documents still describe the
-code. This file claiming a gate exists does not make it exist.
+**Most documentation gates.** `cargo test` now enforces vocabulary — no sink
+implementation is named, no sink's vocabulary is borrowed, and wording a
+decision retired cannot return. Nothing yet checks that a document's *claims*
+match the code. This file saying a gate exists still does not make it exist.
 
 ## What this costs
 

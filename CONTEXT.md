@@ -74,7 +74,10 @@ drainable. Nothing is ever dropped.
 Returning previously recorded material to a client. Bounded, because the
 requester spends its own context on the result.
 
-## Wing / Room
+## Scope
 
-How recorded material is filed in a memory sink. A wing corresponds to one
-project; a room subdivides it by kind. Recall is scoped to a wing.
+The project a record belongs to, and the unit recall is bounded by. Recall
+returns a project's own material and not another's.
+
+How a sink files that internally is the sink's business. Maestro carries the
+scope and does not model the filing.

@@ -10,7 +10,7 @@ CREATE TABLE record (
   created_at      TEXT    NOT NULL,
   source_id       TEXT    NOT NULL,
   session         TEXT    NOT NULL,
-  wing            TEXT    NOT NULL,
+  scope           TEXT    NOT NULL,
   payload         BLOB    NOT NULL,
   state           TEXT    NOT NULL,   -- pending | delivered | dead
   attempts        INTEGER NOT NULL DEFAULT 0,
