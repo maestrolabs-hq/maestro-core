@@ -8,19 +8,19 @@ It knows nothing about any particular agent. Clients ask; Maestro answers.
 ## Layout
 
 ```text
-crates/protocol     what a client may ask, and what Maestro answers
-crates/ledger       durable record of everything Maestro is accountable for
-crates/policy       what is allowed and required: handoff contracts,
-                    refusals, routing, workflow enforcement
-crates/sink         where recorded material goes, over MCP
-crates/supervisor   the always-on server
-crates/cli          the `maestro` binary
+crates/protocol   what a client may ask, and what Maestro answers
+crates/ledger     durable record of what Maestro is accountable for
+crates/cli        the `maestro` binary
 ```
+
+Three crates, not six. `policy`, `sink` and `supervisor` were created before
+anything needed them: a seam is real when something varies across it, and
+nothing did. They return when the code asks for them.
 
 ## Documents
 
 - [CONTEXT.md](./CONTEXT.md) — glossary
-- [docs/supervisor.md](./docs/supervisor.md) — residency, delegation, accountability
+- [docs/supervisor.md](./docs/supervisor.md) — residency, delegation, accountability (design; no crate yet)
 - [docs/protocol.md](./docs/protocol.md) — request and answer
 - [docs/ledger.md](./docs/ledger.md) — durability, states, retry
 

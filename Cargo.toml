@@ -3,9 +3,6 @@ resolver = "3"
 members = [
     "crates/protocol",
     "crates/ledger",
-    "crates/policy",
-    "crates/sink",
-    "crates/supervisor",
     "crates/cli",
 ]
 
@@ -16,6 +13,3 @@ license = "MIT"
 [workspace.dependencies]
 maestro-protocol = { path = "crates/protocol" }
 maestro-ledger = { path = "crates/ledger" }
-maestro-policy = { path = "crates/policy" }
-maestro-sink = { path = "crates/sink" }
-maestro-supervisor = { path = "crates/supervisor" }

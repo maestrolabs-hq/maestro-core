@@ -48,10 +48,13 @@ from hope.
 
 ## Ledger
 
-The durable record of everything Maestro is accountable for — delegations,
-refusals, handoffs, deliveries. Written before the thing it records is acted on,
-so a crash cannot erase what was promised. The ledger, not memory, is what
-Maestro answers questions from.
+The durable record of what Maestro is accountable for. Written before the thing
+it records is acted on, so a crash cannot erase what was promised. The ledger,
+not memory, is what Maestro answers questions from.
+
+Today it holds one kind of record: material accepted and awaiting delivery.
+Delegations, refusals and handoffs belong here too and are not built; they need
+their own shape, and the schema does not pretend otherwise.
 
 ## Sink
 

@@ -2,10 +2,23 @@
 
 Embedded SQLite. Written before acknowledgement, drained afterwards.
 
+## Scope: delivery only
+
+This schema covers material accepted and awaiting delivery, and nothing else.
+The name is `/var/spool/mail`'s: a spool is where things wait to be sent.
+
+The glossary also calls the ledger the record of delegations, refusals and
+handoffs. Those are not here and cannot be added to this table -- there is no
+discriminator, the state machine is a delivery lifecycle, and there is no
+column relating a handoff to the delegation it answers. They will need their
+own tables, designed alongside the delegation contract that is currently
+deferred. Saying so here is cheaper than a schema that silently claims to
+cover them.
+
 ## Schema
 
 ```sql
-CREATE TABLE record (
+CREATE TABLE spool (
   id              INTEGER PRIMARY KEY,
   created_at      TEXT    NOT NULL,
   source_id       TEXT    NOT NULL,
@@ -18,7 +31,7 @@ CREATE TABLE record (
   last_error      TEXT
 );
 
-CREATE INDEX record_drainable ON record (state, next_attempt_at);
+CREATE INDEX spool_due ON spool (state, next_attempt_at);
 
 CREATE TABLE watermark (
   session    TEXT PRIMARY KEY,

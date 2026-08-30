@@ -67,7 +67,7 @@ deferred. Nothing else in this document depends on it.
 
 Whether a client's own main agent may do work directly, rather than handing
 everything to a child, is a workflow rule Maestro enforces — not a property of
-the supervisor. It belongs to `policy`, alongside the other rules about what is
+the supervisor. It is a policy rule, alongside the others about what is
 required.
 
 ## Accountability
@@ -81,18 +81,22 @@ ledger is written first.
 
 ## Crates
 
+Three exist:
+
 | Crate | Owns |
 | --- | --- |
 | `protocol` | what a client may ask, and what Maestro answers |
-| `ledger` | the durable record of everything Maestro is accountable for |
-| `policy` | what is allowed and what is required: handoff contracts, refusals, routing, workflow enforcement |
-| `sink` | where recorded material goes — memory, observability, bridges — over MCP |
-| `supervisor` | the always-on server: listens, holds live state, never waits |
-| `cli` | the `maestro` binary; wakes the supervisor, then asks it |
+| `ledger` | the durable record of what Maestro is accountable for |
+| `cli` | the `maestro` binary |
 
-`policy` deliberately holds handoff contracts, refusals and routing together.
-All three are rules about what is allowed or required, and their seams are not
-yet known. Splitting them now would be guessing; splitting them later is cheap.
+The supervisor, its policy and its sinks are described in this document and are
+not crates. They were, briefly: six crates were created before anything needed
+them, and a seam is only real when something varies across it. Nothing did. They
+come back when code asks for them, which is also when their boundaries will be
+known rather than guessed.
 
-The memory queue that earlier drafts made central is one use of `ledger` and one
-`sink`. It is not the shape of the system.
+Handoff contracts, refusals and routing are all rules about what is allowed or
+required. Whether they are one module or three is not yet knowable, and guessing
+produced three empty crates once already.
+
+Delivery to a sink is one use of the ledger, not the shape of the system.

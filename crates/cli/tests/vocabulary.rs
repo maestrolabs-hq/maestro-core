@@ -162,3 +162,53 @@ fn no_retired_wording_survives() {
         found.join("\n")
     );
 }
+
+/// A document naming a crate that does not exist is the drift the vocabulary
+/// rules cannot see: it is not a banned word, it is a false claim. Deleting
+/// three crates left `supervisor.md` still listing them in a table headed
+/// "Crates", and every gate stayed green.
+#[test]
+fn no_document_names_a_crate_that_does_not_exist() {
+    let root = repo_root();
+    let existing: Vec<String> = fs::read_dir(root.join("crates"))
+        .expect("crates/")
+        .flatten()
+        .filter(|e| e.path().is_dir())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+
+    let mut found = Vec::new();
+    for path in sources() {
+        if path.extension().and_then(|x| x.to_str()) != Some("md") {
+            continue;
+        }
+        let Ok(text) = fs::read_to_string(&path) else {
+            continue;
+        };
+        let rel = path
+            .strip_prefix(&root)
+            .unwrap_or(&path)
+            .display()
+            .to_string();
+        for (n, line) in text.lines().enumerate() {
+            for token in line.split("crates/").skip(1) {
+                let name: String = token
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '-')
+                    .collect();
+                if !name.is_empty() && !existing.contains(&name) {
+                    found.push(format!(
+                        "{rel}:{}: names crates/{name}, which does not exist\n    {}",
+                        n + 1,
+                        line.trim()
+                    ));
+                }
+            }
+        }
+    }
+    assert!(
+        found.is_empty(),
+        "A document names a crate that is not there:\n\n{}\n",
+        found.join("\n")
+    );
+}
