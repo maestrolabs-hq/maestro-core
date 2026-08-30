@@ -55,9 +55,9 @@ import any other, so the contract must be re-asserted by a tool. In Cargo a
 crate cannot reference a crate absent from its `[dependencies]` — it will not
 compile.
 
-That is only enforcement once crates actually depend on each other. Every crate
-here currently declares no dependencies, so the build is enforcing nothing; the
-claim becomes true when the first edge is real. `cargo machete` covers the other
+That is only enforcement once crates actually depend on each other. With two
+crates and no dependency between them, the build enforces nothing yet; the claim
+becomes true when the first edge is real. `cargo machete` covers the other
 direction — a dependency list quietly growing.
 
 ## Coverage is measured, not gated

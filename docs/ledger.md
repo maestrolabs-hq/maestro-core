@@ -1,4 +1,7 @@
-# Ledger
+# Durable record
+
+Design for a store that is not built. No crate implements this; the shape below
+is what the supervisor design needs, written down so it is not re-derived.
 
 Embedded SQLite. Written before acknowledgement, drained afterwards.
 

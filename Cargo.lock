@@ -7,9 +7,5 @@ name = "maestro-cli"
 version = "0.1.0"
 
 [[package]]
-name = "maestro-ledger"
-version = "0.1.0"
-
-[[package]]
 name = "maestro-protocol"
 version = "0.1.0"

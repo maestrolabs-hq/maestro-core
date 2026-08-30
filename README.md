@@ -9,20 +9,24 @@ It knows nothing about any particular agent. Clients ask; Maestro answers.
 
 ```text
 crates/protocol   what a client may ask, and what Maestro answers
-crates/ledger     durable record of what Maestro is accountable for
 crates/cli        the `maestro` binary
 ```
 
-Three crates, not six. `policy`, `sink` and `supervisor` were created before
-anything needed them: a seam is real when something varies across it, and
-nothing did. They return when the code asks for them.
+Two crates. There were six: `policy`, `sink`, `supervisor` and `ledger` were
+each created before anything needed them, and a seam is only real when
+something varies across it. Nothing varied, and every one of them held zero
+lines.
+
+The designs are still here, in `docs/`. They are the part that was worth
+keeping. Crates come back when code asks for them, which is also when their
+boundaries and their names will be known rather than guessed.
 
 ## Documents
 
 - [CONTEXT.md](./CONTEXT.md) — glossary
 - [docs/supervisor.md](./docs/supervisor.md) — residency, delegation, accountability (design; no crate yet)
 - [docs/protocol.md](./docs/protocol.md) — request and answer
-- [docs/ledger.md](./docs/ledger.md) — durability, states, retry
+- [docs/ledger.md](./docs/ledger.md) — durability, states, retry (design; no crate)
 
 ## CLI shape
 
