@@ -16,3 +16,5 @@ maestro-protocol = { path = "crates/protocol" }
 pedantic = { level = "warn", priority = -1 }
 too_many_lines = "warn"
 cognitive_complexity = "warn"
+# Governance uses 5; clippy defaults to 7.
+too_many_arguments = "warn"
