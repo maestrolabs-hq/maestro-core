@@ -32,11 +32,16 @@ between them.
 
 ### The gap this leaves
 
-Nothing restarts the supervisor if it dies. Between a crash and the next
-command, no handoff is enforced and nothing is watched — silently. This is
-accepted for now in exchange for having no install step; a systemd user unit is
-the eventual answer, and `maestro status` must make an absent supervisor
-obvious rather than looking idle.
+Nothing restarts the supervisor if it dies. In practice any active client
+revives it quickly — an agent session touches the supervisor when it starts and
+several times while it runs — so a crash is usually corrected within one turn of
+any running session.
+
+The gap that remains is narrow but real: when no client is running, nothing
+revives it. That matters only when Maestro is holding work with no active
+session, which is also when it matters most. A systemd user unit is the eventual
+answer. Until then `maestro status` must make an absent supervisor obvious
+rather than letting it look idle.
 
 ## Never waiting
 
@@ -57,7 +62,13 @@ blocked until it does. Blocking is the mechanism that makes delegation
 accountable: without it, "delegate everything" degrades into "hope everything
 comes back".
 
-The shape of a delegation contract is not yet specified.
+The shape of a delegation contract is not yet specified, and is deliberately
+deferred. Nothing else in this document depends on it.
+
+Whether a client's own main agent may do work directly, rather than handing
+everything to a child, is a workflow rule Maestro enforces — not a property of
+the supervisor. It belongs to `policy`, alongside the other rules about what is
+required.
 
 ## Accountability
 
