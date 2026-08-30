@@ -1,157 +1,114 @@
 # Quality bar
 
-Taken from the `fld-forge/governance` repository, which is the reference
-implementation of this standard. This document records the bar and what it costs
-to meet, so adopting it is a decision rather than a copy-paste.
+What every repository in this organisation enforces, and what it deliberately
+does not. Derived from an earlier Python governance baseline, but stated here as
+our own rules rather than a comparison.
 
-## The principle worth stealing
+## The principle
 
-Every claim is enforced by something that goes red. The governance repo does not
-document its invariants and hope; it names each one and points at the test that
-holds it. Its own words: an unmeasured value "is written as unmeasured, never
-invented".
+Every claim is enforced by something that goes red. A rule nobody checks is a
+comment, and a comment is not a rule.
 
-Three practices follow from that, and they are the parts most repos skip.
+Two consequences that shape everything below.
 
-**One command, same gates, everywhere.** `just check` runs exactly the commands
-the CI quality job runs. Not similar ones — the same ones. A gate that behaves
-differently locally is a gate nobody trusts.
+**One command, the same commands.** `just check` runs the gates. CI runs those
+same commands, not equivalents. A gate that behaves differently in two places is
+one nobody trusts.
 
-**Architecture is a test, not a convention.** Import Linter contracts fail the
-build when a module imports something it must not. Ruff's banned-api rule
-confines `subprocess`, `socket`, `http.client` and `urllib.request` to a single
-adapter module. "Only this module does IO" is not prose there; it is red.
+**No gate is allowed to be inert.** A check that cannot fail is worse than no
+check: it reports green while looking at nothing. When a gate has no input yet it
+is removed from `check` with a note, not left in place pretending.
 
-**Documentation is gated.** `tests/unit/test_docs.py`, `test_docs_ci.py`,
-`test_readme.py` assert that the docs match the config. The doc gate parses
-`.pre-commit-config.yaml` rather than matching its text, so — quoting the repo —
-"a claim made in a comment cannot satisfy a hook assertion". Docs rot silently
-everywhere else; here rot is a failing test.
-
-## Python reference gates
-
-Seven, run by pre-commit and by CI identically:
+## The gates
 
 ```text
-ruff check .
-ruff format --check .
-ty check --error-on-warning src scripts tests
-mypy                      # strict
-deptry src                # stdlib-only invariant
-lint-imports              # architecture contracts
-pytest -q                 # 90% branch-coverage floor
+cargo fmt --all --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+cargo machete
+cargo deny check
 ```
 
-Thresholds: line length 100; mccabe max-complexity 8; max-statements 30;
-max-args 5; `--cov-fail-under=90` on **branch** coverage, chosen because "this
-tool mutates repository settings, so every untested conditional is a real risk".
+`maestro-pi-config` adds `biome format` and `biome lint` for its JSON, and will
+add `tsc --noEmit` and `node --test` when it holds its first TypeScript.
 
-Hook types are `[pre-commit, pre-merge-commit]`. Without the second, a merge that
-commits on its own brings in changes no gate ever saw.
+| Gate | Catches |
+| --- | --- |
+| `cargo fmt --check` | formatting drift; check-only in CI, `just fmt` writes |
+| `cargo clippy -D warnings` | lints, with warnings as errors |
+| `cargo test` | behaviour |
+| `cargo machete` | dependencies declared but unused |
+| `cargo deny check` | advisories, licences, bans, sources |
 
-Gitleaks is pinned to the same version locally and in CI — same engine both
-sides, so a commit blocked locally is blocked remotely. The repo is honest that
-local hooks are not airtight (`--no-verify`, rebase, fast-forward merges all
-bypass them), which is why CI scans full history.
+`cargo deny` rather than `cargo audit`: it covers advisories *and* licences,
+bans and sources. With an empty dependency list those sections guard against
+that list changing quietly, which is the more likely failure.
 
-## CI jobs
+## Two gates other languages need and Rust does not
 
-`quality`, `dependency-review`, `pip-audit`, `secrets-scan`, `semgrep`,
-`uv-audit`, `zizmor`, plus CodeQL default setup and a separate Scorecard
-workflow.
+**Type checking.** `mypy` and `ty` exist because Python's types are optional.
+`cargo build` already fails on what they would catch.
 
-Every action is pinned by commit SHA. Workflow permissions are `contents: read`.
-`persist-credentials: false` on checkout. Concurrency cancels superseded runs. A
-weekly cron catches bit-rot without pushes.
+**Architecture contracts.** Import Linter exists because any Python module can
+import any other, so the contract must be re-asserted by a tool. In Cargo a
+crate *cannot* reference a crate absent from its `[dependencies]` — it will not
+compile. The crate boundaries in `docs/supervisor.md` are enforced by the build.
 
-## The Rust profile already exists
+What Cargo does not check is a dependency list quietly growing. That is what
+`cargo machete` and review are for.
 
-The same repo specifies a Rust translation. Required on every PR and protected
-push:
+## Coverage is measured, not gated
 
-```text
-rust-format   rust-lint   rust-test   rust-audit
-dependency-review   secrets-scan   actions-security   CodeQL
-```
+`cargo llvm-cov --summary-only` reports; nothing fails on it.
 
-Weekly or manual, as evidence rather than gates: matrix/all-features, MSRV,
-`cargo-audit` as redundant defence, Semgrep Rust, Scorecard, scheduled CodeQL,
-docs/coverage. Heavy-matrix freshness must stay under eight days; a missing,
-failed or stale heavy run is not reported as healthy.
+A line-coverage floor would claim a guarantee it cannot make: `llvm-cov` reports
+no branch data on this toolchain — the Branches column reads `-`. A percentage
+that counts lines while implying branches is worse than no number.
 
-Its scaffold is fixed: edition 2024, no application dependencies, no Cargo
-features, MIT, `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, editor and git
-config, hook config, `NORTHSTAR.md`.
+## Three levels, three authorities
 
-`maestro-core` already matches the first four: edition 2024, no dependencies, no
-features, MIT.
-
-### The tools are not named there
-
-The spec's comparative matrix maps capability to workflow name, never tool to
-tool. Its contracts stay abstract on purpose — "the language's configured
-linter", "the approved static security analysis for the profile". Searching all
-563 lines yields only `clippy` once, `cargo-audit` three times, `prek`,
-`rust-toolchain.toml` and MSRV. No formatter, coverage tool or dependency
-checker is named.
-
-So the Rust toolchain is ours to choose. This is the mapping, against the seven
-Python gates:
-
-| Python gate | Rust equivalent | Note |
+| Level | When | Authority |
 | --- | --- | --- |
-| `ruff format --check` | `cargo fmt --all --check` | check-only in CI, autofix locally |
-| `ruff check` | `cargo clippy --all-targets -- -D warnings` | warnings are errors, matching the "warning-free" KPI |
-| `mypy --strict`, `ty` | none needed | `rustc` is the type gate; there is nothing to bolt on |
-| `deptry` | `cargo machete` | unused declared dependencies |
-| `lint-imports` | none needed | see below |
-| `pytest --cov-fail-under=90` | `cargo test` + `cargo llvm-cov --fail-under-lines` | branch coverage is not available; lines are |
-| `pip-audit`, `uv-audit` | `cargo deny check` | supersedes `cargo audit`: advisories plus licences, bans and sources |
+| Local hooks (prek) | every commit and merge-commit | **None.** Feedback only; a green hook cannot excuse a failed CI check |
+| Fast CI | every push and pull request | **Required.** Merge blocks on it |
+| Heavy CI | weekly or on request | **Evidence.** Never a required check; a stale run is not health |
 
-Two of the seven have no Rust counterpart, for good reasons rather than gaps.
+Hooks are wired for `pre-commit` *and* `pre-merge-commit`. Without the second, a
+merge that commits on its own brings in changes no gate ever saw.
 
-**Types.** `mypy` and `ty` exist because Python's types are optional. Rust's are
-not, and `cargo build` already fails on what they would catch.
+Remote hooks are pinned to an immutable revision. Local gates run through
+`repo: local`, `language: system`, `pass_filenames: false`, so they see the whole
+project rather than the staged subset.
 
-**Architecture contracts.** This is the one place Rust is structurally ahead.
-Import Linter exists because any Python module can import any other; the contract
-has to be re-asserted by a tool. In Cargo, a crate *cannot* reference a crate
-absent from its `[dependencies]` — it will not compile. So ADR-0001's claim,
-that `wire` has no internal dependency and the others depend only on what they
-declare, is enforced by the build itself.
+## Portability is part of the bar
 
-That is worth stating plainly, because it inverts the earlier advice: the
-architecture contracts we would have had to buy with a tool come free, provided
-the crate split stays honest. What Cargo does *not* check is whether a crate's
-dependency list has quietly grown — which is exactly what `cargo machete` and
-code review are for.
+No absolute path is written anywhere — not in code, configuration, task runner or
+workflow. Paths derive from the operating system at run time. See
+[ADR-0001](./adr/0001-paths-are-derived-never-written.md).
 
-### Coverage is not equivalent
+This is currently enforced by review and the absence of literals, not by a gate.
+That is a known weakness: properly testing it means exercising Windows, macOS and
+Linux.
 
-The Python bar is 90% **branch** coverage. `cargo llvm-cov` reports region, line
-and function coverage; branch coverage on stable Rust is not usable. Porting
-"90%" verbatim would claim a guarantee that is not being made. Either state the
-floor as lines and say so, or pick a number knowing it measures something
-weaker.
+## Not yet in place
 
-## What cannot apply yet
+**CI.** Both repositories are public, so rulesets and Actions are available and
+free. Nothing is wired. The fast tier is close to a direct translation of
+`just check`, plus secret scanning, dependency review and CodeQL default setup.
 
-Roughly half this bar is GitHub-side: branch rulesets, required status checks,
-CodeQL, Scorecard, dependency-review, Dependabot. Our repositories have no
-remote, so those are unreachable today.
+**Rulesets.** No required checks, no signed commits, no force-push protection.
+Every gate today is local, and a local gate is bypassed by `--no-verify`.
 
-What is reachable locally, and worth having before any code exists: the gate
-command, the hook wiring including `pre-merge-commit`, formatting, linting,
-tests with a coverage floor, secret scanning, and architecture contracts.
+**Documentation gates.** Nothing checks that these documents still describe the
+code. This file claiming a gate exists does not make it exist.
 
 ## What this costs
 
-The governance repo carries 16 ADRs, a NORTHSTAR with measured KPIs, gated docs
-and roughly 20 test modules for a stdlib-only tool. That is proportionate to
-something holding credentials that mutate a fleet.
+The gates run in seconds on repositories this size, and they have already caught
+six real defects: unused inter-crate dependencies, a formatter rewriting captured
+configuration, a hook appending newlines that made drift unresolvable, a missing
+type dependency hidden by an inert gate, a linter reading build artifacts, and a
+generator dropping a tool name.
 
-Adopting the whole bar on an empty repository is how it becomes ceremony nobody
-maintains. The gates that pay for themselves from the first commit are
-formatting, linting, tests and the architecture contracts — the last because
-`maestro-core`'s crate boundaries are its main design claim, and an unenforced
-boundary is a comment.
+That is the argument for them. Not that they are rigorous, but that on a
+repository with almost no code they were already finding things.
