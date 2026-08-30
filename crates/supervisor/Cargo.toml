@@ -3,9 +3,3 @@ name = "maestro-supervisor"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
-
-[dependencies]
-maestro-wire.workspace = true
-maestro-ledger.workspace = true
-maestro-policy.workspace = true
-maestro-sink.workspace = true

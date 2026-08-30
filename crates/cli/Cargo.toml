@@ -7,7 +7,3 @@ license.workspace = true
 [[bin]]
 name = "maestro"
 path = "src/main.rs"
-
-[dependencies]
-maestro-wire.workspace = true
-maestro-supervisor.workspace = true
