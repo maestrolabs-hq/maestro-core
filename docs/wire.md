@@ -13,8 +13,8 @@ gets a refusal, never a guess.
   "v": 1,
   "kind": "capture",
   "source": { "id": "pi", "session": "01a04e5c-…" },
-  "project": { "root": "/home/franc/workspace/MaestroLabs/maestro-pi-config" },
-  "material": { "path": "/home/franc/.pi/agent/sessions/…/….jsonl" }
+  "project": { "root": "<absolute path to the project root>" },
+  "material": { "path": "<absolute path to the material>" }
 }
 ```
 

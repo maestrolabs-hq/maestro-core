@@ -5,7 +5,11 @@
 # Windows PATH by default, which put a broken `just` npm shim in front of the
 # real one once already. Recipes resolve tools from our own install first, so
 # an inherited PATH cannot decide which binary a gate runs.
-export PATH := env('HOME') / ".cargo/bin:" + env('HOME') / ".local/bin:" + env('PATH')
+#
+# Derived, never hardcoded: `home_directory()` resolves on Windows, macOS and
+# Linux alike, and the separator follows the OS rather than assuming Unix.
+path_sep := if os_family() == "windows" { ";" } else { ":" }
+export PATH := home_directory() / ".cargo" / "bin" + path_sep + home_directory() / ".local" / "bin" + path_sep + env('PATH')
 
 # Install the toolchain this repository needs. Idempotent.
 install:
