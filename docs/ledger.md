@@ -50,13 +50,22 @@ Nothing deletes a row on failure.
 
 ## Draining
 
-There is no daemon. Each capture drains opportunistically: after acknowledging,
-the same process attempts delivery of due rows, then exits. A session that never
-captures again leaves rows pending until the next session drains them, which is
-the correct trade for not running a background process.
+The supervisor drains. It holds the only handle on this database, which is what
+keeps a single writer against WAL rather than several processes contending for
+it, and it schedules retries without anything else having to stay alive.
 
-`maestro memory drain` forces a drain, and is the recovery path when a sink
-was down for a long time.
+Draining never happens on the path that acknowledges. A capture is durable and
+the child released before delivery is attempted, so a slow or unreachable sink
+cannot reach back into an exchange.
+
+When the supervisor is not running, nothing drains. Rows stay pending, which is
+what pending means, and the next client to wake the supervisor picks them up.
+That is the cost of the residency model in
+[supervisor.md](./supervisor.md): a machine with no client activity is also a
+machine doing no delivery.
+
+`maestro memory drain` forces a drain, and is the recovery path when a sink was
+down for a long time.
 
 ## Retry
 
