@@ -86,6 +86,54 @@ config, hook config, `NORTHSTAR.md`.
 `maestro-core` already matches the first four: edition 2024, no dependencies, no
 features, MIT.
 
+### The tools are not named there
+
+The spec's comparative matrix maps capability to workflow name, never tool to
+tool. Its contracts stay abstract on purpose — "the language's configured
+linter", "the approved static security analysis for the profile". Searching all
+563 lines yields only `clippy` once, `cargo-audit` three times, `prek`,
+`rust-toolchain.toml` and MSRV. No formatter, coverage tool or dependency
+checker is named.
+
+So the Rust toolchain is ours to choose. This is the mapping, against the seven
+Python gates:
+
+| Python gate | Rust equivalent | Note |
+| --- | --- | --- |
+| `ruff format --check` | `cargo fmt --all --check` | check-only in CI, autofix locally |
+| `ruff check` | `cargo clippy --all-targets -- -D warnings` | warnings are errors, matching the "warning-free" KPI |
+| `mypy --strict`, `ty` | none needed | `rustc` is the type gate; there is nothing to bolt on |
+| `deptry` | `cargo machete` | unused declared dependencies |
+| `lint-imports` | none needed | see below |
+| `pytest --cov-fail-under=90` | `cargo test` + `cargo llvm-cov --fail-under-lines` | branch coverage is not available; lines are |
+| `pip-audit`, `uv-audit` | `cargo deny check` | supersedes `cargo audit`: advisories plus licences, bans and sources |
+
+Two of the seven have no Rust counterpart, for good reasons rather than gaps.
+
+**Types.** `mypy` and `ty` exist because Python's types are optional. Rust's are
+not, and `cargo build` already fails on what they would catch.
+
+**Architecture contracts.** This is the one place Rust is structurally ahead.
+Import Linter exists because any Python module can import any other; the contract
+has to be re-asserted by a tool. In Cargo, a crate *cannot* reference a crate
+absent from its `[dependencies]` — it will not compile. So ADR-0001's claim,
+that `wire` has no internal dependency and the others depend only on what they
+declare, is enforced by the build itself.
+
+That is worth stating plainly, because it inverts the earlier advice: the
+architecture contracts we would have had to buy with a tool come free, provided
+the crate split stays honest. What Cargo does *not* check is whether a crate's
+dependency list has quietly grown — which is exactly what `cargo machete` and
+code review are for.
+
+### Coverage is not equivalent
+
+The Python bar is 90% **branch** coverage. `cargo llvm-cov` reports region, line
+and function coverage; branch coverage on stable Rust is not usable. Porting
+"90%" verbatim would claim a guarantee that is not being made. Either state the
+floor as lines and say so, or pick a number knowing it measures something
+weaker.
+
 ## What cannot apply yet
 
 Roughly half this bar is GitHub-side: branch rulesets, required status checks,
