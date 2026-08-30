@@ -1,11 +1,11 @@
-# Durable queue
+# Ledger
 
 Embedded SQLite. Written before acknowledgement, drained afterwards.
 
 ## Schema
 
 ```sql
-CREATE TABLE capture (
+CREATE TABLE record (
   id              INTEGER PRIMARY KEY,
   created_at      TEXT    NOT NULL,
   source_id       TEXT    NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE capture (
   last_error      TEXT
 );
 
-CREATE INDEX capture_drainable ON capture (state, next_attempt_at);
+CREATE INDEX record_drainable ON record (state, next_attempt_at);
 
 CREATE TABLE watermark (
   session    TEXT PRIMARY KEY,
@@ -55,17 +55,17 @@ the same process attempts delivery of due rows, then exits. A session that never
 captures again leaves rows pending until the next session drains them, which is
 the correct trade for not running a background process.
 
-`maestro memory drain` forces a drain, and is the recovery path when a consumer
+`maestro memory drain` forces a drain, and is the recovery path when a sink
 was down for a long time.
 
 ## Retry
 
 Exponential backoff on `next_attempt_at`, bounded attempts. On exhaustion the
-row moves to `dead` — parked, still present, still drainable once the consumer
+row moves to `dead` — parked, still present, still drainable once the sink
 is healthy.
 
 The retry rate is bounded; retention is not. Dropping a capture because a
-consumer misbehaved would reintroduce the silent loss this queue exists to
+sink misbehaved would reintroduce the silent loss this queue exists to
 prevent.
 
 ## Visibility

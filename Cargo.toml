@@ -1,9 +1,11 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/protocol",
-    "crates/queue",
-    "crates/delivery",
+    "crates/wire",
+    "crates/ledger",
+    "crates/policy",
+    "crates/sink",
+    "crates/supervisor",
     "crates/cli",
 ]
 
@@ -12,6 +14,8 @@ edition = "2024"
 license = "MIT"
 
 [workspace.dependencies]
-maestro-protocol = { path = "crates/protocol" }
-maestro-queue = { path = "crates/queue" }
-maestro-delivery = { path = "crates/delivery" }
+maestro-wire = { path = "crates/wire" }
+maestro-ledger = { path = "crates/ledger" }
+maestro-policy = { path = "crates/policy" }
+maestro-sink = { path = "crates/sink" }
+maestro-supervisor = { path = "crates/supervisor" }

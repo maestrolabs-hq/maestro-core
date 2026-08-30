@@ -2,71 +2,79 @@
 
 Glossary for maestro-core. Terms only — no implementation detail.
 
-Maestro knows nothing about any particular agent. Nothing in this glossary
-names one.
+Maestro knows nothing about any particular agent. Nothing here names one.
 
 ## Maestro
 
-A framework agents run under, and the master orchestrator of agent work. It
-governs behaviour — refusing destructive commands, running sanity checks,
-monitoring, observability, carrying messages outward — and it owns the memory
-path from capture through to delivery.
+The orchestrator agents work under. It delegates all the work and does none of
+it, while remaining accountable for all of it: what was handed out, to whom,
+whether it returned, and whether what returned is what was asked for.
 
-## Child project
+## Supervisor
 
-Anything that consumes Maestro. A child sends envelopes and reads
-acknowledgements; it holds no orchestration logic of its own.
+The always-on process. It listens, holds live state across concurrently running
+projects, and must always be able to accept a request. Residency exists for
+concurrency, not for speed: state that spans projects cannot live in a process
+that only exists during a command.
 
-## Envelope
+## Never waiting
 
-The versioned JSON message a child sends. It states what the child wants —
-material captured, or material recalled — and never why. Maestro does not learn
-what happened in the child that produced it.
+A property of the supervisor, not of its callers. No work — a consumer, a model,
+a child agent — may block the accept loop. Slow work is recorded and handed to a
+worker. A caller may still wait for its own answer.
 
-## Acknowledgement
+## Client
 
-Maestro's reply to an envelope, on stdout. For a capture it means the material
-is durable. For a recall it carries the recalled material.
+Anything that talks to the supervisor: the `maestro` command, or a shim inside
+an agent. A client holds no orchestration logic. It wakes the supervisor if it
+is not listening, then asks.
 
-## Capture
+## Delegation
 
-Material accepted into the durable queue. A capture is complete once durable,
-before any consumer has seen it. This is the point the acknowledgement reports.
+Work handed out, carrying a stated expectation of what must come back.
+Delegating without stating the expectation is how accountability is lost.
 
-## Durable queue
+## Handoff
 
-The record of captures accepted but not yet delivered. It is why a consumer
-being unavailable cannot lose material, and it is the reason Maestro sits
-between a child and a consumer rather than being bypassed.
+The return of delegated work, checked against the expectation the delegation
+stated.
 
-## Watermark
+## Refusal
 
-Per-session marker of how far capture has already reached, so a child sends
-only what is new.
+Maestro declining something: a handoff that does not satisfy what was asked, a
+destructive command, a step that breaks a workflow. A refused delegate stays
+blocked until it satisfies the contract. Blocking is what separates delegation
+from hope.
 
-## Consumer
+## Ledger
 
-A downstream store Maestro delivers to: MemPalace, CodeGraphContext, Graphify.
-Consumers are reached over MCP. A consumer is never a runtime dependency —
-Maestro accepts and acknowledges captures whether or not any consumer is
-reachable.
+The durable record of everything Maestro is accountable for — delegations,
+refusals, handoffs, deliveries. Written before the thing it records is acted on,
+so a crash cannot erase what was promised. The ledger, not memory, is what
+Maestro answers questions from.
+
+## Sink
+
+A downstream destination for recorded material: memory, observability, outward
+bridges. Sinks are reached over MCP. A sink is never a runtime dependency —
+Maestro records and acknowledges whether or not any sink is reachable.
 
 ## Delivery
 
-Handing a captured item to a consumer. Happens after acknowledgement, and may
-fail without losing the capture.
+Handing recorded material to a sink. Happens after acknowledgement, and may fail
+without losing the record.
 
 ## Dead letter
 
-A capture whose delivery attempts are exhausted. It is parked, stays visible,
-and can be drained again. A capture is never dropped.
+A record whose delivery attempts are exhausted. Parked, still visible, still
+drainable. Nothing is ever dropped.
 
 ## Recall
 
-Returning previously captured material. Bounded, because the requester spends
-its own context on the result.
+Returning previously recorded material to a client. Bounded, because the
+requester spends its own context on the result.
 
 ## Wing / Room
 
-How captured material is filed. A wing corresponds to one project; a room
-subdivides it by kind. Recall is scoped to a wing.
+How recorded material is filed in a memory sink. A wing corresponds to one
+project; a room subdivides it by kind. Recall is scoped to a wing.

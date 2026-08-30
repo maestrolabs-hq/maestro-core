@@ -1,13 +1,8 @@
 [package]
-name = "maestro-cli"
+name = "maestro-policy"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
-[[bin]]
-name = "maestro"
-path = "src/main.rs"
-
 [dependencies]
 maestro-wire.workspace = true
-maestro-supervisor.workspace = true

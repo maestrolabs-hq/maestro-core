@@ -6,25 +6,42 @@ version = 4
 name = "maestro-cli"
 version = "0.1.0"
 dependencies = [
- "maestro-delivery",
- "maestro-protocol",
- "maestro-queue",
+ "maestro-supervisor",
+ "maestro-wire",
 ]
 
 [[package]]
-name = "maestro-delivery"
+name = "maestro-ledger"
 version = "0.1.0"
 dependencies = [
- "maestro-protocol",
+ "maestro-wire",
 ]
 
 [[package]]
-name = "maestro-protocol"
-version = "0.1.0"
-
-[[package]]
-name = "maestro-queue"
+name = "maestro-policy"
 version = "0.1.0"
 dependencies = [
- "maestro-protocol",
+ "maestro-wire",
 ]
+
+[[package]]
+name = "maestro-sink"
+version = "0.1.0"
+dependencies = [
+ "maestro-ledger",
+ "maestro-wire",
+]
+
+[[package]]
+name = "maestro-supervisor"
+version = "0.1.0"
+dependencies = [
+ "maestro-ledger",
+ "maestro-policy",
+ "maestro-sink",
+ "maestro-wire",
+]
+
+[[package]]
+name = "maestro-wire"
+version = "0.1.0"

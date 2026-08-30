@@ -1,8 +1,9 @@
 [package]
-name = "maestro-queue"
+name = "maestro-sink"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-maestro-protocol.workspace = true
+maestro-wire.workspace = true
+maestro-ledger.workspace = true
