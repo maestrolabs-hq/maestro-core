@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/protocol",
+    "crates/queue",
+    "crates/delivery",
+    "crates/cli",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+maestro-protocol = { path = "crates/protocol" }
+maestro-queue = { path = "crates/queue" }
+maestro-delivery = { path = "crates/delivery" }

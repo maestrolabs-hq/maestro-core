@@ -1,0 +1,14 @@
+[package]
+name = "maestro-cli"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "maestro"
+path = "src/main.rs"
+
+[dependencies]
+maestro-protocol.workspace = true
+maestro-queue.workspace = true
+maestro-delivery.workspace = true
