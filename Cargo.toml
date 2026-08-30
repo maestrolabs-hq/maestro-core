@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/wire",
+    "crates/protocol",
     "crates/ledger",
     "crates/policy",
     "crates/sink",
@@ -14,7 +14,7 @@ edition = "2024"
 license = "MIT"
 
 [workspace.dependencies]
-maestro-wire = { path = "crates/wire" }
+maestro-protocol = { path = "crates/protocol" }
 maestro-ledger = { path = "crates/ledger" }
 maestro-policy = { path = "crates/policy" }
 maestro-sink = { path = "crates/sink" }

@@ -15,13 +15,13 @@ name = "maestro-policy"
 version = "0.1.0"
 
 [[package]]
+name = "maestro-protocol"
+version = "0.1.0"
+
+[[package]]
 name = "maestro-sink"
 version = "0.1.0"
 
 [[package]]
 name = "maestro-supervisor"
-version = "0.1.0"
-
-[[package]]
-name = "maestro-wire"
 version = "0.1.0"

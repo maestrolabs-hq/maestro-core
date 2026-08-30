@@ -83,7 +83,7 @@ ledger is written first.
 
 | Crate | Owns |
 | --- | --- |
-| `wire` | what a client may ask, and what Maestro answers |
+| `protocol` | what a client may ask, and what Maestro answers |
 | `ledger` | the durable record of everything Maestro is accountable for |
 | `policy` | what is allowed and what is required: handoff contracts, refusals, routing, workflow enforcement |
 | `sink` | where recorded material goes — memory, observability, bridges — over MCP |

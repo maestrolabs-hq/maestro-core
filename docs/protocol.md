@@ -1,4 +1,4 @@
-# Wire
+# Protocol
 
 The contract between a child project and Maestro. One envelope in on stdin,
 one acknowledgement out on stdout, one process per exchange.
