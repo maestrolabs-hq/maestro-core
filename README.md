@@ -1,6 +1,6 @@
 <div align="center">
 
-# maestro-core
+# Maestro-Core
 
 **The orchestrator agents work under**
 
