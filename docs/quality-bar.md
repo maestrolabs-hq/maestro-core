@@ -29,8 +29,11 @@ cargo machete
 cargo deny check
 ```
 
-`maestro-pi-config` adds `biome format` and `biome lint` for its JSON, and will
-add `tsc --noEmit` and `node --test` when it holds its first TypeScript.
+`maestro-pi-config` held a TypeScript toolchain that linted only its own
+configuration files, and it was removed. The TypeScript gates exist in
+`maestrolabs-hq/.github` and are attached when a repository has TypeScript,
+not before -- `ts-types` over zero files reports green while looking at
+nothing.
 
 | Gate | Catches |
 | --- | --- |

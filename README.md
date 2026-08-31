@@ -44,7 +44,8 @@ boundaries and their names will be known rather than guessed.
 
 ## CLI shape
 
-Noun-verb, after herdr. The command is a thin client over the supervisor.
+Noun-verb, after herdr. The command is designed as a thin client over the
+supervisor described in `docs/supervisor.md`; neither is built.
 
 ```text
 maestro memory   capture | recall | status | drain
