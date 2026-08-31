@@ -1,3 +1,9 @@
+# The envelope one agent hands another.
+#
+# Deliberately dependency-free and transport-ignorant: the moment this crate
+# knows how a message travels or where it lands, every consumer inherits that
+# choice. See docs/protocol.md for the shape and why it is versioned.
+
 [package]
 name = "maestro-protocol"
 version = "0.1.0"

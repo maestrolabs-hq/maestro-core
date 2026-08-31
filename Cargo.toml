@@ -1,3 +1,13 @@
+# The workspace. Two crates, and the split is load-bearing.
+#
+# `protocol` is the envelope shape: what one agent hands another, with no
+# knowledge of transport, storage or who receives it. `cli` is the only thing
+# that talks to a terminal.
+#
+# Four other crates existed here and were deleted, because a seam is only real
+# when something varies across it and none of them held a line of code. The
+# designs survive in docs/ as designs.
+
 [workspace]
 resolver = "3"
 members = [

@@ -1,3 +1,8 @@
+# The command-line entry point, and the only crate that assumes a terminal.
+#
+# Designed as a thin client over the supervisor described in docs/supervisor.md.
+# Neither the supervisor nor any subcommand is built yet; see TODO.md.
+
 [package]
 name = "maestro-cli"
 version = "0.1.0"
