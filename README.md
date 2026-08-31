@@ -1,7 +1,21 @@
+<div align="center">
+
 # maestro-core
 
-The orchestrator agents work under. Maestro delegates all the work and does
-none of it, while staying accountable for all of it.
+**The orchestrator agents work under**
+
+Delegates all the work and does none of it, while staying accountable for all of it.
+
+  <a href="https://github.com/maestrolabs-hq/maestro-core/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/maestrolabs-hq/maestro-core/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=1c1c1c&color=2ea043"></a>
+  <a href="https://github.com/maestrolabs-hq/maestro-core/actions/workflows/heavy.yml"><img alt="Heavy" src="https://img.shields.io/github/actions/workflow/status/maestrolabs-hq/maestro-core/heavy.yml?branch=main&style=for-the-badge&label=Heavy&labelColor=1c1c1c&color=8957e5"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/maestrolabs-hq/maestro-core"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/maestrolabs-hq/maestro-core?style=for-the-badge&label=Scorecard&labelColor=1c1c1c"></a>
+  <a href="https://github.com/maestrolabs-hq/maestro-core/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-1c1c1c?style=for-the-badge&labelColor=1c1c1c&color=0969da"></a>
+
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-1.98-CE422B?style=flat-square&logo=rust&logoColor=white">
+
+</div>
+
+---
 
 It knows nothing about any particular agent. Clients ask; Maestro answers.
 
