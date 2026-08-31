@@ -38,6 +38,38 @@ the moment the protocol version stops being a guess.
 
 ## P1 -- open design questions the docs do not answer
 
+### 0. Should the three verbs move under one `maestro` CLI?
+
+Not yet. Written down here so the question is not re-opened from scratch.
+
+`maestro-pi-config` and `maestro-governance` now share a three-verb contract:
+
+```text
+plan     shows what would change, changes nothing
+apply    refuses without --auto-approve
+destroy  removes only what the tool itself wrote
+```
+
+They share no code, only that shape. Two instances is not a pattern -- the
+rule of three exists because the second one always looks more alike than it
+turns out to be.
+
+Three reasons to wait:
+
+- **This repository has no commands.** A unifying layer would arrive before
+  the thing it unifies, which is how the four deleted crates happened.
+- **`pi-config` bootstraps a machine.** It has to run before the estate
+  exists, so it must not depend on the estate.
+- **`governance` has no `destroy`** and probably never will, so the contract
+  is not actually uniform yet.
+
+Revisit when this repository has one real verb. At that point there will be a
+third user and something to compare.
+
+What is worth carrying across regardless is the guarantee, not the code: show
+before acting, refuse without an explicit flag, and never remove what you did
+not write.
+
 ### 3. "Never waiting" has no worker or concurrency model
 
 The supervisor design says the CLI never waits. Nothing says how many workers
