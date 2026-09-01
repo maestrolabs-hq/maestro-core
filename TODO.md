@@ -103,19 +103,45 @@ listing them in a table headed 'Crates', and every gate stayed green."*
 Proved by injection into a scratch copy:
 
 ```text
-INJECTION A -- fictional crate in the table's own format:
-  | `nonexistent-crate` | a crate that has never existed |
+INJECTION A -- a fictional crate named in the table's own format,
+               as a backticked bare name in a markdown row:
   test no_document_names_a_crate_that_does_not_exist ... ok        <- passes
 
-INJECTION B -- the same crate written as a path:
-  See crates/nonexistent-crate for details.
+INJECTION B -- the same fictional crate named as a directory path,
+               in an ordinary sentence:
   test no_document_names_a_crate_that_does_not_exist ... FAILED    <- catches
 ```
 
-The check matches `crates/<name>` paths only, so the markdown-table form it was
-written to catch is the one form it misses.
+`crates/cli/tests/vocabulary.rs:157` splits each line on the directory prefix
+and reads the following word, so it sees a path reference and nothing else. The
+markdown-table form it was written to catch is the one form it misses.
+
+(The injected strings are described here rather than quoted, because of #5a.)
 
 **Fix:** also parse the "Crates" table rows; add the table form as a test case.
+
+### 5a. The gate cannot be documented without being tripped
+
+The check is line-based with no awareness of fenced code blocks, so a document
+that quotes a path reference -- including a finding explaining what the gate
+misses -- fails it. The first write-up of #5 did exactly that:
+
+```text
+$ cargo test --all-targets
+test no_document_names_a_crate_that_does_not_exist ... FAILED
+  TODO.md:111: names a crate that does not exist
+test result: FAILED. 3 passed; 1 failed
+```
+
+`tests/language.rs` solves the same self-reference problem properly: it builds
+its accent ranges from code points so the file cannot fail its own test. This
+gate has no equivalent.
+
+**Why it matters:** the estate's stated practice is to record a finding where
+the next reader will look. One of its gates mechanically forbids recording this
+particular finding, which is how a blind spot stays undocumented.
+
+**Fix:** track fence toggles while iterating lines and skip fenced content.
 
 ### 6. The context name every document gives does not exist
 
@@ -260,3 +286,100 @@ handovers -- already points at this. It has simply not been built.
   once. The prose gate catches vocabulary; nothing catches "this paragraph
   describes software that does not exist." A test that fails when a doc claims
   a command the CLI does not expose would.
+
+---
+
+## Round 2 -- the gates, injected against
+
+This repository holds the estate's most elaborate gates. Forty-five injections
+were run against a scratch copy to find what each one cannot see.
+
+### 13. Six of the eight gates report green when the scanner finds nothing
+
+Every gate asserts that a `found` vector is empty; none has a positive control.
+Making the file walk return an empty list, with a real violation present:
+
+```text
+M1 sources() empty -- vocabulary/sink        PASS(missed)
+M2 sources() empty -- crate existence        PASS(missed)
+M3 sources() empty -- english gate           PASS(missed)
+M4 sources() empty -- module size            PASS(missed)
+M5 scan() returns an empty Vec               PASS(missed)
+```
+
+Not hypothetical: three silent-skip paths already exist
+(`common/mod.rs:20`, `vocabulary.rs:40`, `standards.rs:65`):
+
+```text
+H1 banned word in a chmod-000 .md            PASS(missed)
+H2 banned word in an invalid-UTF-8 .md       PASS(missed)
+H5 banned word under a chmod-000 directory   PASS(missed)
+```
+
+`docs/quality-bar.md:18` -- *"No gate is allowed to be inert. A check that
+cannot fail is worse than no check: it reports green while looking at
+nothing."* `NORTHSTAR.md:22` -- *"Every check here has been proved by injecting
+the fault it exists to catch and watching it fail."* Neither holds.
+
+**Fix:** panic on a directory-read error and on a file that fails to decode;
+assert the source list is non-empty against a known floor; add one positive
+control per gate that runs the matcher against a fixture and asserts it fires.
+
+### 14. The sink gates miss every form Rust code actually uses
+
+`contains_word` (`vocabulary.rs:23`) treats `_` and alphanumerics as word
+characters, so identifiers and plurals are not boundary matches:
+
+```text
+A1 the sink name in a .md (control)     FAIL(caught)
+A2 the same name pluralised             PASS(missed)
+A3 the same name inside an identifier   PASS(missed)
+A4 the same name in snake_case          PASS(missed)
+```
+
+Retired vocabulary is invisible when wrapped across a line, and one retired
+word is already back in the documents.
+
+**Fix:** match on a normalised token stream rather than raw word boundaries, and
+join wrapped lines before scanning.
+
+### 15. Three lines of boilerplate disable the module-size gate, in all three repositories
+
+`code_lines` counts lines before the first test-module attribute and never
+resumes, so anything below it is uncounted:
+
+```text
+honest 401-line module                          FAILED   (control)
+same 400 lines, with a test module on lines 2-3     ok    <- evaded
+```
+
+This repository's looser matcher also accepts a negated test attribute as the
+terminator. `AGENTS.md` points at this gate for "single responsibility".
+
+**Fix:** count all non-test lines, not the prefix before the first test
+attribute.
+
+### 16. Gate coverage gaps, verified
+
+- Every gate is blind to YAML, JSON and the justfile.
+- The English gate misses combining accents, Latin Extended-A and every
+  non-Latin script; the justfile is not read at all.
+- A symlink makes the gates read outside the repository.
+- The duplication gate only looks inside `crates/`.
+- The module-size gate skips `tests/`, where the largest module actually is.
+- The brief gate accepts a shebang, a bare `#`, or a `//!` anywhere in the file,
+  and reads fewer than half the tracked files.
+- The gauntlet-loop gate is case-sensitive under a claim that it is not.
+- Doc tests are never executed anywhere in the estate's CI.
+- Mutation and coverage jobs measure three lines; the protocol crate
+  contributes nothing.
+
+### 17. Documents against code
+
+- `protocol.md` defines a verb and a field that `ledger.md` cannot serve.
+- The P0 task points at a document that has never existed.
+- `quality-bar.md` contradicts itself and lists a gate with nothing to check.
+- ADR-0001's decision text is stricter than the gate now claiming to enforce it.
+- `rust-version = "1.85"` is declared and inherited by nothing.
+- "English only" is one sentence at one line number in three repositories, with
+  two different gates behind it.
