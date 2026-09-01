@@ -88,6 +88,121 @@ memory-specific and let other domains have their own.
 
 ---
 
+## P1 -- documents ahead of the code, and gates blind to it
+
+### 5. `docs/supervisor.md` lists three crates; two exist, and the gate is blind
+
+`docs/supervisor.md:82-90` has a table headed "Crates" naming `protocol`,
+`ledger` and `cli`. `ls crates/` returns `cli` and `protocol`. `README.md:29`
+says the `ledger` crate was deleted; `docs/ledger.md:3` says "No crate
+implements this."
+
+The gate written for exactly this defect passes. `crates/cli/tests/vocabulary.rs:134`
+carries the doc comment *"Deleting three crates left `supervisor.md` still
+listing them in a table headed 'Crates', and every gate stayed green."*
+Proved by injection into a scratch copy:
+
+```text
+INJECTION A -- fictional crate in the table's own format:
+  | `nonexistent-crate` | a crate that has never existed |
+  test no_document_names_a_crate_that_does_not_exist ... ok        <- passes
+
+INJECTION B -- the same crate written as a path:
+  See crates/nonexistent-crate for details.
+  test no_document_names_a_crate_that_does_not_exist ... FAILED    <- catches
+```
+
+The check matches `crates/<name>` paths only, so the markdown-table form it was
+written to catch is the one form it misses.
+
+**Fix:** also parse the "Crates" table rows; add the table form as a test case.
+
+### 6. The context name every document gives does not exist
+
+`AGENTS.md:93` and `docs/quality-bar.md:98` name the context
+`fast / cross-platform`. A matrix job reports one context per leg:
+
+```text
+$ gh api repos/maestrolabs-hq/maestro-core/actions/runs/33391234014/jobs --jq '.jobs[].name'
+heavy / cross-platform (macos-latest)
+heavy / cross-platform (windows-latest)
+```
+
+`AGENTS.md:142` warns about precisely this -- *"Renaming a CI job renames a
+required context. The ruleset naming the old one blocks every pull request
+until it is updated."* Anyone acting on the documents and adding
+`fast / cross-platform` verbatim creates a context that can never report,
+blocking every pull request indefinitely.
+
+**Fix:** write both leg names in both documents.
+
+### 7. `docs/quality-bar.md` "Not yet in place" describes an estate that is gone
+
+The section lists as missing several controls that now exist, and omits ones
+that do not.
+
+**Fix:** regenerate the section against the current fast and heavy tiers.
+
+### 8. `cross-platform` does not exercise the path derivation ADR-0001 protects
+
+The job builds and tests on Windows and macOS, which is worth having. But the
+path-derivation code ADR-0001 exists to protect has no test that runs a derived
+path on a non-Unix layout, so the matrix proves compilation rather than
+behaviour.
+
+**Fix:** a test that derives a path from a synthetic Windows-shaped environment
+and asserts the result, running on every platform.
+
+### 9. `just check` is not "the same commands" CI runs
+
+Both `justfile` and `CONTRIBUTING` claim parity. The fast tier runs prose,
+brief, markdown, TOML, secrets, actions-security and no-absolute-paths; `just
+check` runs none of them.
+
+**Fix:** narrow the claim, or add the language-agnostic gates to `just check`.
+
+### 10. `no-absolute-paths` does not refuse a bare drive letter
+
+The pattern refuses a drive letter only when the first segment is the Windows
+user root. A drive letter followed by any other directory -- the canonical
+Windows form of the failure ADR-0001 records -- passes. `AGENTS.md:88` and
+`docs/quality-bar.md:96` both say it refuses "a drive letter".
+
+(This entry deliberately describes the patterns rather than quoting them: the
+gate scans every tracked file, so a document that spells out its own trigger
+fails it. The same is true of the workflow that defines them, which is why that
+one file is excluded.)
+
+An uppercase-anchored pattern requiring a capital drive letter, a separator and
+a path character was probed against all four repositories and is clean, while
+catching every non-user-root drive path tried. It false-positives on a
+format string ending in a capitalised word before an escape, which is the
+tradeoff to weigh.
+
+**Fix:** extend the pattern, or narrow both documents to "a home directory or a
+user profile".
+
+### 11. `protocol.md`, `supervisor.md` and `CONTEXT.md` state unbuilt behaviour as fact
+
+`docs/protocol.md` and `docs/supervisor.md` describe behaviour in the present
+tense with no "not yet" note. `CONTEXT.md` marks some terms *(designed)* and
+not others, so unmarked terms read as built.
+
+This is the failure the TODO's own closing section names: *"nothing catches
+'this paragraph describes software that does not exist'"*.
+
+**Fix:** mark every unbuilt behaviour consistently, and add the test that
+section asks for.
+
+### 12. ADR-0001 cites `just doctor` as its mitigation; nothing runs it
+
+The ADR's stated mitigation for a wrongly-derived path is that `just doctor`
+prints what resolved. No gate runs it and no test covers it.
+
+**Fix:** run it in CI, or drop the claim.
+
+---
+
 ## How this becomes the best in the world
 
 Blunt: it is not close today, and the gap is not quality -- the gates here are
