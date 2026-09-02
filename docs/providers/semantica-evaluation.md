@@ -41,7 +41,7 @@
 
 ## Approved direct integration design
 
-Install `semantica==0.6.7` as-is and run the direct `semantica-mcp` stdio server. Use the HOME-derived workspace path `<workspace>/.maestro/state/providers/semantica/global-graph.json` for the workspace-global graph, initially seeded only from `maestro-core` through native repository ingestion. Keep Semantica's identity and results independent from CGC, Graphify, and MemPalace. Expose all 15 native wheel tools and document the inconsistent native mutation persistence rather than adding a proxy or persistence layer. [local ADR](../adr/0001-paths-are-derived-never-written.md) · [provider state spec](./direct-provider-state-and-semantica.md) · [mcp/README.md](https://github.com/semantica-agi/semantica/blob/main/mcp/README.md)
+Install `semantica==0.6.7` as-is and run the direct `semantica-mcp` stdio server. Use the HOME-derived workspace path `<workspace>/.maestro/state/providers/semantica/global-graph.json` for the workspace-global graph, initially seeded only from `maestro-core` through native repository ingestion. Keep Semantica's identity and results independent from CGC, Graphify, and MemPalace. Expose all 15 native wheel tools and document the inconsistent native mutation persistence rather than adding a proxy or persistence layer. [local ADR](../adr/0001-paths-are-derived-never-written.md) · [mcp/README.md](https://github.com/semantica-agi/semantica/blob/main/mcp/README.md)
 
 ## Open items after the direct phase
 
