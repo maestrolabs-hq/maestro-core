@@ -70,6 +70,8 @@ fn no_sink_implementation_is_named() {
         ("mempalace", "names a memory sink; say 'a memory sink'"),
         ("graphify", "names a graph sink; say 'a graph sink'"),
         ("codegraphcontext", "names a graph sink; say 'a graph sink'"),
+        ("semantica", "names a graph sink; say 'a graph sink'"),
+        ("cgc", "names a graph sink; say 'a graph sink'"),
     ];
     let found = scan(&banned, true, true);
     assert!(

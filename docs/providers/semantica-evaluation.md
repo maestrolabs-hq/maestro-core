@@ -8,7 +8,7 @@
 - It is a Python package (>=3.8; 3.11+ recommended) with a very large core dependency set, not a small Rust-native add-on. [Installation](https://github.com/semantica-agi/semantica/blob/main/docs/installation.md) · [pyproject.toml](https://github.com/semantica-agi/semantica/blob/main/pyproject.toml)
 - It ships an MCP server, but the documented/current modular server is **stdio JSON-RPC**, one in-memory graph per process, optionally loaded from `SEMANTICA_KG_PATH`; the reviewed 0.6.7 wheel exposes 15 tools and four resources. [mcp/README.md](https://github.com/semantica-agi/semantica/blob/main/mcp/README.md) · [mcp/session.py](https://github.com/semantica-agi/semantica/blob/main/mcp/session.py)
 - Graph construction and query are available in-memory, JSON/Markdown persistence, and external graph/vector backends; no native multi-repository global graph registry was found. [ContextGraph](https://github.com/semantica-agi/semantica/blob/main/semantica/context/context_graph.py) · [graph-store config](https://github.com/semantica-agi/semantica/blob/main/semantica/graph_store/config.py)
-- **Install blocker (high):** Semantica's scope, dependency footprint, persistence semantics, and security/update lifecycle do not yet map to Maestro's deliberately thin, durable, derived-path architecture. [README.md](../README.md) · [ADR 0001](../adr/0001-paths-are-derived-never-written.md) · [ledger.md](../ledger.md)
+- **Accepted direct-phase risk (high):** Direct installation accepts Semantica's dependency footprint and persistence limitations while explicitly not treating Semantica as Maestro's ledger and preserving the direct integration boundaries. [README.md](../../README.md) · [ADR 0001](../adr/0001-paths-are-derived-never-written.md) · [ledger.md](../ledger.md)
 
 ## Findings
 
@@ -30,7 +30,7 @@
 
 9. **Security/privacy (high).** Raw-text ingestion can be local, but choosing cloud providers or remote graph/vector backends sends data outside the process; credentials are supplied through provider/database configuration. The release notes mention SSRF hardening for integrations, while the OpenAI provider only validates URL scheme, so network reachability and endpoint trust remain deployment responsibilities. Persisted JSON/Markdown contains graph content, metadata, provenance, and decisions and must be treated as sensitive. [pyproject.toml](https://github.com/semantica-agi/semantica/blob/main/pyproject.toml) · [v0.6.7 release](https://github.com/semantica-agi/semantica/releases/tag/v0.6.7) · [providers.py](https://github.com/semantica-agi/semantica/blob/main/semantica/semantic_extract/providers.py)
 
-10. **Skills and overlap with Maestro providers (high gap).** Semantica's README claims plugin bundles/skills for several agent products including Codex CLI, but the reviewed sources do not identify a Pi-specific skill. The local Maestro repository currently documents only protocol, supervisor, ledger, and CLI design; its complete tracked tree contains no `CGC` or `Graphify` provider document/config evidence to compare, so overlap cannot be asserted beyond conceptual scope: Semantica is a Python graph/context/LLM platform, whereas Maestro is a thin Rust CLI/protocol design with durable spool semantics and no implemented commands. [Semantica README](https://github.com/semantica-agi/semantica/blob/main/README.md) · [local `README.md`](../README.md) · [local `docs/adr/0001-paths-are-derived-never-written.md`](../adr/0001-paths-are-derived-never-written.md) · [local repository tree](https://github.com/maestrolabs-hq/maestro-core/tree/main)
+10. **Skills and overlap with Maestro providers (high gap).** Semantica's README claims plugin bundles/skills for several agent products including Codex CLI, but the reviewed sources do not identify a Pi-specific skill. Semantica overlaps this work's graph/context concerns but remains an independent integration boundary from Maestro providers: it is a Python graph/context/LLM platform with different durability and execution assumptions. [Semantica README](https://github.com/semantica-agi/semantica/blob/main/README.md) · [local `README.md`](../../README.md) · [local `docs/adr/0001-paths-are-derived-never-written.md`](../adr/0001-paths-are-derived-never-written.md) · [CGC](./cgc.md) · [Graphify](./graphify.md) · [local repository tree](https://github.com/maestrolabs-hq/maestro-core/tree/main)
 
 ## Risks carried into the direct phase
 
@@ -48,36 +48,3 @@ Install `semantica==0.6.7` as-is and run the direct `semantica-mcp` stdio server
 1. Whether Semantica should gain transactional mutation handling in a later Maestro integration.
 2. Which llama.cpp server/version and structured-output contract should be supported beyond the initial local check.
 3. What retention and deletion guarantees are required for graph content, embeddings, provenance, and exported files.
-
-## Acceptance report
-
-```acceptance-report
-{
-  "criteriaSatisfied": [
-    {
-      "id": "criterion-1",
-      "status": "satisfied",
-      "evidence": "Concrete Semantica findings, severity-tagged blockers, local README/ADR/protocol/ledger evidence, and primary-source URLs are recorded in this report."
-    }
-  ],
-  "changedFiles": [
-    "docs/research/semantica-evaluation.md"
-  ],
-  "testsAddedOrUpdated": [],
-  "commandsRun": [],
-  "validationOutput": [
-    "Primary-source web research completed; no software installed or executed."
-  ],
-  "residualRisks": [
-    "CGC and Graphify authoritative evidence was absent from the tracked local tree.",
-    "No runtime installation or endpoint compatibility test was performed.",
-    "Semantica JSON persistence atomicity was assessed from source, not experimentally fault-injected."
-  ],
-  "noStagedFiles": true,
-  "diffSummary": "Added one evidence-cited Semantica evaluation note; no runtime/configuration files changed.",
-  "reviewFindings": [
-    "blocker: global multi-repository semantics and durable atomic persistence remain undefined before installation."
-  ],
-  "manualNotes": "The requested note is the only file modified."
-}
-```
