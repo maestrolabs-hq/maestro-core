@@ -31,11 +31,16 @@ its vocabulary stays within this adapter and documentation.
 
 | Field | Value |
 | --- | --- |
-| Package | `semantica` **pinned 0.6.7** (uv tool) |
+| Package | `semantica` **pinned 0.6.7** (MIT; uv tool) |
 | MCP server | `semantica-mcp` (direct stdio server) |
 | Active graph | `<workspace>/.maestro/state/providers/semantica/global-graph.json` |
 | Initial corpus | `maestro-core` only, ingested through the native repository API |
 | Scope | Workspace-global, with an identity independent of CGC and Graphify |
+
+The Python package has a large dependency footprint spanning scientific
+computing, NLP/ML, document parsing, and graph/vector integrations. Semantica
+has no native multi-repository registry, so this deployment uses its single
+configured file as the workspace-global graph.
 
 ## Wiring
 
@@ -49,9 +54,10 @@ its vocabulary stays within this adapter and documentation.
 ```
 
 The workspace path is derived from `HOME`; the placeholder above is not a
-machine-specific path. The server loads the one configured JSON graph at
-startup. The direct native server is exposed as installed; no proxy or extra
-provider layer is used.
+machine-specific path. The server uses stdio JSON-RPC and keeps one in-memory graph per process,
+loading the configured JSON graph at startup from `SEMANTICA_KG_PATH`. The
+direct native server is exposed as installed; no proxy or extra provider layer
+is used.
 
 ## Skills and Pi integration
 
@@ -92,5 +98,6 @@ without an atomic write protocol. These limitations are documented rather than
 fixed in this direct integration phase.
 
 Semantica's JSON graph is not a ledger and does not replace Maestro durability.
-Keep all content local by using the configured local provider and local graph
-path; remote model or graph backends are outside this integration.
+Keep inference and graph storage local by using the configured local provider
+and local graph path; remote model or graph backends are outside this
+integration.
