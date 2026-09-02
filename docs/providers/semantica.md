@@ -53,6 +53,14 @@ machine-specific path. The server loads the one configured JSON graph at
 startup. The direct native server is exposed as installed; no proxy or extra
 provider layer is used.
 
+## Skills and Maestro equivalents
+
+No Pi-specific skill was identified in the reviewed 0.6.7 sources, and none is
+installed. Semantica is direct MCP only in this phase; its MCP server is a
+provider interface, not a Pi skill. The installed `maestro-cli` skill has no
+implemented Semantica or graph facade yet, so no Maestro equivalent is
+available today.
+
 ## MCP tools (15 in wheel 0.6.7)
 
 | Tool | Description | Maestro equivalent | Tested |

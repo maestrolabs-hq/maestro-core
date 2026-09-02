@@ -54,6 +54,16 @@ commands to update it when the repository changes; it is not auto-refreshed. Cal
 `project_path` argument switches to `<project>/graphify-out/graph.json`;
 omit it to query the served global graph.
 
+## Skills and Maestro equivalents
+
+Graphify ships an official Pi skill, installed at
+`~/.pi/agent/skills/graphify`, matching `graphifyy` 0.9.53. The skill documents
+the direct Graphify workflow for building and querying provider graphs. The
+installed `maestro-cli` skill is the future stable Maestro graph facade, but
+`maestro graph` commands are not implemented yet. The Graphify MCP server and
+CLI are provider interfaces; neither is a Pi skill, and `maestro-cli` is the
+planned Maestro equivalent.
+
 ## CLI surface
 
 | Command | Purpose |

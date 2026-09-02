@@ -56,6 +56,14 @@ Caveats: a long-running client caches the spawned server — restart the client
 (Pi `/reload`) after changing this wiring. Tool results arrive wrapped as JSON
 text in `result.content[0].text`; decode before reading fields. Tools that re-read source files from disk require the original repository path to remain available.
 
+## Skills and Maestro equivalents
+
+No provider-supplied Pi skill was identified in the installed distribution. CGC
+is currently used through its MCP server and CLI. The installed `maestro-cli`
+skill is the planned stable Maestro graph facade; `maestro graph` commands are
+not implemented yet. The MCP server and CLI are provider interfaces, not Pi
+skills, and `maestro-cli` is the future Maestro equivalent.
+
 ## CLI surface
 
 | Command | Purpose |

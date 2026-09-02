@@ -53,6 +53,14 @@ The active store has 2,904 drawers in total, including 1,458 for the `maestro-co
 | `mempalace hooks …` | Lifecycle hook management for agent integration |
 | Other commands | See `mempalace --help`; unused by Maestro, which speaks MCP to the provider |
 
+## Skills and Maestro equivalents
+
+No provider-supplied Pi skill was identified. The installed `maestro-cli` skill
+documents the available Maestro memory facade. The temporary autosave and
+relation-derivation components are Pi extensions, not skills. The MemPalace MCP
+server and CLI are provider interfaces; `maestro-cli` is the stable Maestro
+equivalent for the available memory operations.
+
 ## MCP tools (44)
 
 | Tool | Description | Maestro equivalent | Tested |
