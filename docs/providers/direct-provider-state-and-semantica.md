@@ -45,8 +45,8 @@ paths use HOME interpolation and never name a machine.
 
 The direct provider MCP servers remain available as native provider surfaces.
 Provider-specific tool names and counts stay in their adapters and provider
-pages; Semantica's reviewed 0.6.7 wheel exposes exactly 15 tools. Maestro facades remain the stable protocol
-boundary where they exist; direct native tools do not imply merged provider
+pages; Semantica's reviewed 0.6.7 wheel exposes exactly 15 tools. Direct native MCP
+interfaces are the active integration surface, with no claim of merged provider
 state.
 
 ## Migration sequence

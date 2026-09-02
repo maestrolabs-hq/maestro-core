@@ -1,9 +1,8 @@
 # MemPalace
 
-MemPalace is the durable memory provider behind the `maestro memory` facade.
-Maestro acknowledges writes only after SQLite commit, then the Supervisor
-delivers to MemPalace asynchronously. Its governed native MCP server is also
-available for provider setup and diagnostics.
+MemPalace is the durable memory provider used through native MCP and CLI surfaces.
+Its governed native MCP server is also available for provider setup and
+diagnostics.
 
 ## What it does and why Maestro uses it
 
@@ -37,7 +36,7 @@ MemPalace vocabulary never leaks past its adapter.
 | --- | --- |
 | Package | `mempalace` v3.8.0 (uv tool) |
 | CLI | `mempalace` |
-| MCP server | `mempalace-mcp` — registered in the governed Pi MCP configuration; Maestro remains the stable facade |
+| MCP server | `mempalace-mcp` — registered in the governed Pi MCP configuration |
 | Store | `<workspace>/.maestro/state/providers/mempalace` (native home; `~/.mempalace` is a filesystem alias) |
 | Repository identity | `<workspace>/.maestro/state/providers/mempalace/identity.txt` (stable L0 identity per estate repository) |
 
@@ -51,69 +50,64 @@ The active store has 2,904 drawers in total, including 1,458 for the `maestro-co
 | --- | --- |
 | `mempalace mine <path>` | Mine documents/conversations into drawers (`--mode`, `--wing`, `--agent`, `--limit`) |
 | `mempalace hooks …` | Lifecycle hook management for agent integration |
-| Other commands | See `mempalace --help`; unused by Maestro, which speaks MCP to the provider |
+| Other commands | See `mempalace --help`; direct provider access remains current |
 
-## Skills and Maestro equivalents
+## Skills and Pi integration
 
-No provider-supplied Pi skill was identified. The installed `maestro-cli` skill
-documents the available Maestro memory facade. The temporary autosave and
-relation-derivation components are Pi extensions, not skills. The MemPalace MCP
-server and CLI are provider interfaces; `maestro-cli` is the stable Maestro
-equivalent for the available memory operations.
+No provider-supplied Pi skill was identified. `mempalace-autosave` and
+`mempalace-derive-relations` are installed as temporary Pi extensions, not
+skills. The MemPalace MCP and CLI remain the current direct interfaces.
 
 ## MCP tools (44)
 
-| Tool | Description | Maestro equivalent | Tested |
-| --- | --- | --- | --- |
-| `mempalace_status` | Palace overview — total drawers, wing and room counts | `maestro memory status` — available | verified |
-| `mempalace_list_wings` | List all wings with drawer counts | no facade — provider-internal | not exercised |
-| `mempalace_list_rooms` | List rooms within a wing (or all rooms if no wing given) | no facade — provider-internal | not exercised |
-| `mempalace_get_taxonomy` | Full taxonomy: wing → room → drawer count | no facade — provider-internal | not exercised |
-| `mempalace_get_aaak_spec` | Get the AAAK dialect specification — the compressed memory format MemPalace uses. | no facade — provider-internal | not exercised |
-| `mempalace_kg_query` | Query the knowledge graph for an entity's relationships. | memory protocol v1 temporal graph query — available | verified |
-| `mempalace_kg_add` | Add a fact to the knowledge graph. | memory protocol v1 graph mutation — available | skipped (mutating) |
-| `mempalace_kg_invalidate` | Mark a fact as no longer true. | memory protocol v1 graph mutation — available | skipped (mutating) |
-| `mempalace_kg_supersede` | Atomically replace a fact with its successor at a shared boundary. | memory protocol v1 graph mutation — available | skipped (mutating) |
-| `mempalace_kg_timeline` | Chronological timeline of facts. | memory protocol v1 temporal graph timeline — available | verified |
-| `mempalace_kg_stats` | Knowledge graph overview: entities, triples, current vs expired facts, relationship types. | memory protocol v1 graph statistics — available | verified |
-| `mempalace_traverse` | Walk the palace graph from a room. | memory protocol v1 graph traversal — available | verified |
-| `mempalace_find_tunnels` | Find rooms that bridge two wings — the hallways connecting different domains. | memory protocol v1 graph traversal — available | verified |
-| `mempalace_graph_stats` | Palace graph overview: total rooms, tunnel connections, edges between wings. | memory protocol v1 graph statistics — available | verified |
-| `mempalace_mesh_peers` | Mesh estate snapshot (RFC 004): this replica's identity, version vector and node profile; each configured peer's reachability, last sync outcome, remo… | no facade — provider-internal | not exercised |
-| `mempalace_create_tunnel` | Create a cross-wing tunnel linking two palace locations. | no facade — provider-internal | not exercised |
-| `mempalace_list_tunnels` | List all explicit cross-wing tunnels. | no facade — provider-internal | not exercised |
-| `mempalace_delete_tunnel` | Delete an explicit tunnel by its ID. | no facade — provider-internal | not exercised |
-| `mempalace_list_hallways` | List within-wing hallway records (entity-to-entity co-occurrence links built at mine time). | no facade — provider-internal | not exercised |
-| `mempalace_delete_hallway` | Delete a hallway record by its ID. | no facade — provider-internal | not exercised |
-| `mempalace_follow_tunnels` | Follow tunnels from a room to see what it connects to in other wings. | memory protocol v1 graph traversal — available | verified |
-| `mempalace_search` | Semantic search. | `maestro memory recall` — available | verified |
-| `mempalace_check_duplicate` | Check if content already exists in the palace before filing | no facade — provider-internal | not exercised |
-| `mempalace_add_drawer` | File verbatim content into the palace. | `maestro memory capture` — available | skipped (mutating) |
-| `mempalace_checkpoint` | Save a whole session in one call: semantic-dedups each item, files non-duplicates as drawers, then writes one diary entry. | `maestro memory capture` — available | skipped (mutating) |
-| `mempalace_delete_drawer` | Delete a drawer by ID. | no facade — provider-internal | not exercised |
-| `mempalace_mine` | Mine a directory into the palace — the MCP equivalent of `mempalace mine`. | `maestro memory ingest` — available | skipped (mutating) |
-| `mempalace_delete_by_source` | Bulk-delete every drawer mined from one source_file (exact match). | no facade — provider-internal | not exercised |
-| `mempalace_sync` | Prune drawers whose source files are gitignored, deleted, or moved. | `maestro memory sync` — available | skipped (mutating) |
-| `mempalace_get_drawer` | Fetch a single drawer by ID — returns full content and metadata. | no facade — provider-internal | not exercised |
-| `mempalace_list_drawers` | List drawers with pagination. | no facade — provider-internal | not exercised |
-| `mempalace_update_drawer` | Update an existing drawer's content and/or metadata (wing, room). | no facade — provider-internal | not exercised |
-| `mempalace_diary_write` | Write to your personal agent diary in AAAK format. | `maestro memory capture` (session summary) — available | skipped (mutating) |
-| `mempalace_diary_read` | Read your recent diary entries (in AAAK). | `maestro memory recall --startup` — available | verified |
-| `mempalace_hook_settings` | Get or set hook behavior. | no facade — provider-internal | not exercised |
-| `mempalace_memories_filed_away` | Check if a recent palace checkpoint was saved. | no facade — provider-internal | not exercised |
-| `mempalace_reconnect` | Force reconnect to the palace database. | no facade — provider-internal | not exercised |
-| `mempalace_event_append` | Append an immutable agent-coordination event to the logstream (RFC 003). | no facade — provider-internal | not exercised |
-| `mempalace_event_list` | List agent-coordination events with structured filters, oldest first (append order, not timestamp order). | no facade — provider-internal | not exercised |
-| `mempalace_event_wait` | Block until a matching coordination event exists or the timeout expires (default 60s, max 5 minutes). | no facade — provider-internal | not exercised |
-| `mempalace_event_ack` | Acknowledge a coordination event: appends a new event.ack routed back to the original writer with the correlation id copied. | no facade — provider-internal | not exercised |
-| `mempalace_artifact_put` | Store exact artifact content (unified diff patch, file, log, json, note) for agent handoffs. | no facade — provider-internal | not exercised |
-| `mempalace_artifact_get` | Fetch a coordination artifact by id — exact content plus sha256 for verification. | no facade — provider-internal | not exercised |
-| `mempalace_patch_submit` | Convenience: store a patch artifact and append its patch.ready event in one call. | no facade — provider-internal | not exercised |
+| Tool | Description | Tested |
+| --- | --- | --- |
+| `mempalace_status` | Palace overview — total drawers, wing and room counts | verified |
+| `mempalace_list_wings` | List all wings with drawer counts | not exercised |
+| `mempalace_list_rooms` | List rooms within a wing (or all rooms if no wing given) | not exercised |
+| `mempalace_get_taxonomy` | Full taxonomy: wing → room → drawer count | not exercised |
+| `mempalace_get_aaak_spec` | Get the AAAK dialect specification — the compressed memory format MemPalace uses. | not exercised |
+| `mempalace_kg_query` | Query the knowledge graph for an entity's relationships. | verified |
+| `mempalace_kg_add` | Add a fact to the knowledge graph. | skipped (mutating) |
+| `mempalace_kg_invalidate` | Mark a fact as no longer true. | skipped (mutating) |
+| `mempalace_kg_supersede` | Atomically replace a fact with its successor at a shared boundary. | skipped (mutating) |
+| `mempalace_kg_timeline` | Chronological timeline of facts. | verified |
+| `mempalace_kg_stats` | Knowledge graph overview: entities, triples, current vs expired facts, relationship types. | verified |
+| `mempalace_traverse` | Walk the palace graph from a room. | verified |
+| `mempalace_find_tunnels` | Find rooms that bridge two wings — the hallways connecting different domains. | verified |
+| `mempalace_graph_stats` | Palace graph overview: total rooms, tunnel connections, edges between wings. | verified |
+| `mempalace_mesh_peers` | Mesh estate snapshot (RFC 004): this replica's identity, version vector and node profile; each configured peer's reachability, last sync outcome, remo… | not exercised |
+| `mempalace_create_tunnel` | Create a cross-wing tunnel linking two palace locations. | not exercised |
+| `mempalace_list_tunnels` | List all explicit cross-wing tunnels. | not exercised |
+| `mempalace_delete_tunnel` | Delete an explicit tunnel by its ID. | not exercised |
+| `mempalace_list_hallways` | List within-wing hallway records (entity-to-entity co-occurrence links built at mine time). | not exercised |
+| `mempalace_delete_hallway` | Delete a hallway record by its ID. | not exercised |
+| `mempalace_follow_tunnels` | Follow tunnels from a room to see what it connects to in other wings. | verified |
+| `mempalace_search` | Semantic search. | verified |
+| `mempalace_check_duplicate` | Check if content already exists in the palace before filing | not exercised |
+| `mempalace_add_drawer` | File verbatim content into the palace. | skipped (mutating) |
+| `mempalace_checkpoint` | Save a whole session in one call: semantic-dedups each item, files non-duplicates as drawers, then writes one diary entry. | skipped (mutating) |
+| `mempalace_delete_drawer` | Delete a drawer by ID. | not exercised |
+| `mempalace_mine` | Mine a directory into the palace — the MCP equivalent of `mempalace mine`. | skipped (mutating) |
+| `mempalace_delete_by_source` | Bulk-delete every drawer mined from one source_file (exact match). | not exercised |
+| `mempalace_sync` | Prune drawers whose source files are gitignored, deleted, or moved. | skipped (mutating) |
+| `mempalace_get_drawer` | Fetch a single drawer by ID — returns full content and metadata. | not exercised |
+| `mempalace_list_drawers` | List drawers with pagination. | not exercised |
+| `mempalace_update_drawer` | Update an existing drawer's content and/or metadata (wing, room). | not exercised |
+| `mempalace_diary_write` | Write to your personal agent diary in AAAK format. | skipped (mutating) |
+| `mempalace_diary_read` | Read your recent diary entries (in AAAK). | verified |
+| `mempalace_hook_settings` | Get or set hook behavior. | not exercised |
+| `mempalace_memories_filed_away` | Check if a recent palace checkpoint was saved. | not exercised |
+| `mempalace_reconnect` | Force reconnect to the palace database. | not exercised |
+| `mempalace_event_append` | Append an immutable agent-coordination event to the logstream (RFC 003). | not exercised |
+| `mempalace_event_list` | List agent-coordination events with structured filters, oldest first (append order, not timestamp order). | not exercised |
+| `mempalace_event_wait` | Block until a matching coordination event exists or the timeout expires (default 60s, max 5 minutes). | not exercised |
+| `mempalace_event_ack` | Acknowledge a coordination event: appends a new event.ack routed back to the original writer with the correlation id copied. | not exercised |
+| `mempalace_artifact_put` | Store exact artifact content (unified diff patch, file, log, json, note) for agent handoffs. | not exercised |
+| `mempalace_artifact_get` | Fetch a coordination artifact by id — exact content plus sha256 for verification. | not exercised |
+| `mempalace_patch_submit` | Convenience: store a patch artifact and append its patch.ready event in one call. | not exercised |
 
 ## Notes
 
-- Tools marked "available" are reachable today through `maestro memory` and the
-  memory protocol v1 envelope; the concrete tool names above are provider
-  vocabulary and stay confined to the MemPalace adapter.
-- Tunnels, hallways, mesh, events, artifacts, and patch tools have no facade:
-  Maestro reports such operations unavailable rather than bypassing the boundary.
+- Verification reflects native provider interfaces in this direct MCP phase.
+- Tunnels, hallways, mesh, events, artifacts, and patch tools are not represented in the current native-direct documentation boundaries.

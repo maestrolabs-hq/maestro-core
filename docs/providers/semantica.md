@@ -53,33 +53,31 @@ machine-specific path. The server loads the one configured JSON graph at
 startup. The direct native server is exposed as installed; no proxy or extra
 provider layer is used.
 
-## Skills and Maestro equivalents
+## Skills and Pi integration
 
 No Pi-specific skill was identified in the reviewed 0.6.7 sources, and none is
-installed. Semantica is direct MCP only in this phase; its MCP server is a
-provider interface, not a Pi skill. The installed `maestro-cli` skill has no
-implemented Semantica or graph facade yet, so no Maestro equivalent is
-available today.
+installed. No provider-specific Pi extension is installed. Semantica is direct MCP
+only in this phase; its MCP server is a provider interface, not a Pi skill.
 
 ## MCP tools (15 in wheel 0.6.7)
 
-| Tool | Description | Maestro equivalent | Tested |
-| --- | --- | --- | --- |
-| `extract_entities` | Extract entities from supplied content. | planned semantic extraction | not exercised |
-| `extract_relations` | Extract relationships from supplied content. | planned semantic extraction | not exercised |
-| `record_decision` | Record a decision and its context. | planned decision record | not exercised |
-| `query_decisions` | Query recorded decisions. | planned decision query | not exercised |
-| `find_precedents` | Find related prior decisions or cases. | planned precedent query | not exercised |
-| `get_causal_chain` | Return a causal chain from graph context. | planned semantic graph query | not exercised |
-| `add_entity` | Add an entity to the graph. | no facade — provider-native | not exercised |
-| `add_relationship` | Add a relationship to the graph. | no facade — provider-native | not exercised |
-| `run_reasoning` | Run reasoning over graph context. | planned semantic reasoning | not exercised |
-| `get_graph_analytics` | Return graph analytics. | planned semantic graph status | not exercised |
-| `export_graph` | Export the semantic graph. | no facade — provider-native | not exercised |
-| `get_graph_summary` | Return graph summary information. | planned semantic graph status | verified |
-| `query_graph` | Query the graph; use `mode: "search"` for semantic search. | planned semantic graph query | verified |
-| `update_node` | Update a graph node. | no facade — provider-native | not exercised |
-| `delete_node` | Delete a graph node. | no facade — provider-native | not exercised |
+| Tool | Description | Tested |
+| --- | --- | --- |
+| `extract_entities` | Extract entities from supplied content. | not exercised |
+| `extract_relations` | Extract relationships from supplied content. | not exercised |
+| `record_decision` | Record a decision and its context. | not exercised |
+| `query_decisions` | Query recorded decisions. | not exercised |
+| `find_precedents` | Find related prior decisions or cases. | not exercised |
+| `get_causal_chain` | Return a causal chain from graph context. | not exercised |
+| `add_entity` | Add an entity to the graph. | not exercised |
+| `add_relationship` | Add a relationship to the graph. | not exercised |
+| `run_reasoning` | Run reasoning over graph context. | not exercised |
+| `get_graph_analytics` | Return graph analytics. | not exercised |
+| `export_graph` | Export the semantic graph. | not exercised |
+| `get_graph_summary` | Return graph summary information. | verified |
+| `query_graph` | Query the graph; use `mode: "search"` for semantic search. | verified |
+| `update_node` | Update a graph node. | not exercised |
+| `delete_node` | Delete a graph node. | not exercised |
 
 ## Current state and limitations
 

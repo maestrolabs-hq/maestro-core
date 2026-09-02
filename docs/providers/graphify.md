@@ -54,15 +54,13 @@ commands to update it when the repository changes; it is not auto-refreshed. Cal
 `project_path` argument switches to `<project>/graphify-out/graph.json`;
 omit it to query the served global graph.
 
-## Skills and Maestro equivalents
+## Skills and Pi integration
 
 Graphify ships an official Pi skill, installed at
 `~/.pi/agent/skills/graphify`, matching `graphifyy` 0.9.53. The skill documents
-the direct Graphify workflow for building and querying provider graphs. The
-installed `maestro-cli` skill is the future stable Maestro graph facade, but
-`maestro graph` commands are not implemented yet. The Graphify MCP server and
-CLI are provider interfaces; neither is a Pi skill, and `maestro-cli` is the
-planned Maestro equivalent.
+the direct Graphify workflow for building and querying provider graphs. No
+provider-specific Pi extension is installed. The Graphify MCP server and CLI are
+provider interfaces; neither is a Pi skill.
 
 ## CLI surface
 
@@ -76,15 +74,15 @@ planned Maestro equivalent.
 
 ## MCP tools (10)
 
-| Tool | Description | Maestro equivalent | Tested |
-| --- | --- | --- | --- |
-| `query_graph` | Search the knowledge graph using BFS or DFS. | planned `maestro graph query` (source: repository-graph) | not exercised |
-| `get_node` | Get full details for a specific node by label or ID. | planned `maestro graph query` (source: repository-graph) | not exercised |
-| `get_neighbors` | Get all direct neighbors of a node with edge details. | planned `maestro graph query` (source: repository-graph) | not exercised |
-| `get_community` | Get all nodes in a community by community ID. | planned `maestro graph query` (source: repository-graph) | not exercised |
-| `god_nodes` | Return the most connected nodes - the core abstractions of the knowledge graph. | planned `maestro graph report` (source: repository-graph) | verified |
-| `graph_stats` | Return summary statistics: node count, edge count, communities, confidence breakdown. | planned `maestro graph status` (source: repository-graph) | verified |
-| `shortest_path` | Find the shortest path between two concepts in the knowledge graph. | planned `maestro graph query` (source: repository-graph) | not exercised |
-| `list_prs` | List open GitHub PRs with CI status, review state, and graph impact (which communities each PR touches, blast radius). | no facade — PR dashboard is out of Maestro scope | not exercised |
-| `get_pr_impact` | Get detailed graph impact for a specific PR: which files it changes, which knowledge-graph communities are affected, and how many nodes are touched. | no facade — PR dashboard is out of Maestro scope | not exercised |
-| `triage_prs` | Return all actionable open PRs (correct base, not stale) with full graph impact data so you can reason about review priority, merge order, and conflic… | no facade — PR dashboard is out of Maestro scope | not exercised |
+| Tool | Description | Tested |
+| --- | --- | --- |
+| `query_graph` | Search the knowledge graph using BFS or DFS. | not exercised |
+| `get_node` | Get full details for a specific node by label or ID. | not exercised |
+| `get_neighbors` | Get all direct neighbors of a node with edge details. | not exercised |
+| `get_community` | Get all nodes in a community by community ID. | not exercised |
+| `god_nodes` | Return the most connected nodes - the core abstractions of the knowledge graph. | verified |
+| `graph_stats` | Return summary statistics: node count, edge count, communities, confidence breakdown. | verified |
+| `shortest_path` | Find the shortest path between two concepts in the knowledge graph. | not exercised |
+| `list_prs` | List open GitHub PRs with CI status, review state, and graph impact (which communities each PR touches, blast radius). | not exercised |
+| `get_pr_impact` | Get detailed graph impact for a specific PR: which files it changes, which knowledge-graph communities are affected, and how many nodes are touched. | not exercised |
+| `triage_prs` | Return all actionable open PRs (correct base, not stale) with full graph impact data so you can reason about review priority, merge order, and conflic… | not exercised |
