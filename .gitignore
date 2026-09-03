@@ -83,3 +83,4 @@ Desktop.ini
 # Agent and tool state.
 .worktrees/
 .superpowers/
+.codegraph
