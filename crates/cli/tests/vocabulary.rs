@@ -30,16 +30,24 @@ fn contains_word(haystack: &str, needle: &str) -> bool {
     })
 }
 
-fn scan(banned: &[(&str, &str)], skip_self: bool, allow_provider_docs: bool) -> Vec<String> {
+fn scan(banned: &[(&str, &str)], skip_self: bool, allow_tooling_docs: bool) -> Vec<String> {
     let root = repo_root();
-    let allowed_provider_docs = root.join("docs").join("providers");
+    let allowed_tooling_docs = [
+        root.join("docs").join("providers"),
+        root.join("docs").join("skills"),
+        root.join("docs").join("tools"),
+    ];
     let mut found = Vec::new();
     for path in sources() {
         if skip_self && path.ends_with("vocabulary.rs") {
             continue;
         }
         // Provider-specific documentation is the explicit adapter boundary.
-        if allow_provider_docs && path.starts_with(&allowed_provider_docs) {
+        if allow_tooling_docs
+            && allowed_tooling_docs
+                .iter()
+                .any(|allowed| path.starts_with(allowed))
+        {
             continue;
         }
         let Ok(text) = fs::read_to_string(&path) else {
