@@ -11,8 +11,8 @@ database and answers precise structural questions: who calls this function,
 which functions are dead, what is the cyclomatic complexity, what does a raw
 graph query return. Maestro uses it as the workspace-context source because
 those answers come from the AST itself — deterministic, no model involved —
-and keeping it independent from Graphify gives two graph opinions that are
-never merged, so each can be trusted or replaced on its own.
+and keeping it independent from Graphify and CodeGraph gives three graph
+opinions that are never merged, so each can be trusted or replaced on its own.
 
 ## Vocabulary mapping
 
