@@ -3,15 +3,17 @@
 This directory contains one page per provider. Provider-specific vocabulary is
 allowed here only; this documented boundary is exempted by the vocabulary gate.
 
-All providers use the HOME-derived direct state root
+The six graph and memory providers use the HOME-derived direct state root
 `<workspace>/.maestro/state/providers/{cgc,codebase-memory,codegraph,graphify,mempalace,semantica}`.
 The `<workspace>` placeholder is resolved at runtime and never names a machine
-path.
+path. Each holds a separate identity, index, score, and result set; results
+are never merged, and each uses one direct active state — no staging,
+generations, promotion, proxy, or extra hash workflow.
 
-Providers remain logically independent: each has a separate identity, index,
-score, and result set. Results are never merged. Each provider uses one direct
-active state; there is no staging, generations, promotion, proxy, or extra hash
-workflow.
+Docling is the one entry on this page that is not a graph or memory
+provider: it converts documents and holds no index of its own, so its only
+state is the model-weight cache described on its page, kept outside
+`<workspace>/.maestro/state` in the operator's model estate.
 
 Graphify and MemPalace keep their native homes under the shared root. Filesystem
 aliases at `~/.graphify` and `~/.mempalace` preserve compatibility because some
@@ -26,6 +28,7 @@ filesystem alias.
 | [CGC](./cgc.md) | Structural code graph and AST queries | `<workspace>/.maestro/state/providers/cgc/kuzudb` |
 | [Codebase-Memory](./codebase-memory.md) | Persistent code knowledge graph with sub-millisecond structural queries | `<workspace>/.maestro/state/providers/codebase-memory/` |
 | [CodeGraph](./codegraph.md) | Pre-indexed per-project code knowledge graph with auto-sync | `<workspace>/.maestro/state/providers/codegraph/` |
+| [Docling](./docling.md) | Local document conversion (PDF, DOCX, and more) to structured Markdown/JSON; no repository index | `~/models/document/parsing/docling` (model cache, not `<workspace>/.maestro/state`) |
 | [Graphify](./graphify.md) | Portable repository graph and optional semantic extraction | `<workspace>/.maestro/state/providers/graphify/` |
 | [MemPalace](./mempalace.md) | Durable local memory and temporal knowledge graph | `<workspace>/.maestro/state/providers/mempalace/` |
 | [Semantica](./semantica.md) | Semantic context graph, decisions, and reasoning | `<workspace>/.maestro/state/providers/semantica/global-graph.json` |
