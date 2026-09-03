@@ -1,8 +1,8 @@
 # CodeGraph
 
-CodeGraph maintains a third independent repository graph — alongside CGC,
-Graphify, and Codebase-Memory — built by a native Rust kernel and served from
-an in-repo SQLite database. Identities, indexes, scores, and results are
+CodeGraph maintains one of four independent repository graphs (the others are
+CGC, Graphify, and Codebase-Memory) — built by a native Rust kernel and served
+from an in-repo SQLite database. Identities, indexes, scores, and results are
 never merged across providers.
 
 ## What it does and why Maestro uses it

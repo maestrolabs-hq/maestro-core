@@ -1,8 +1,8 @@
 # Codebase-Memory (CBM)
 
-Codebase-Memory maintains a fourth independent repository graph — alongside
-CGC, Graphify, and CodeGraph — built by a single static Go binary with
-vendored tree-sitter grammars and served from a local SQLite database.
+Codebase-Memory maintains one of four independent repository graphs (the
+others are CGC, Graphify, and CodeGraph) — built by a single static Go binary
+with vendored tree-sitter grammars and served from a local SQLite database.
 Identities, indexes, scores, and results are never merged across providers.
 
 ## What it does and why Maestro uses it
@@ -11,7 +11,7 @@ Codebase-Memory parses source with tree-sitter across 162 languages, adding
 Hybrid LSP semantic type resolution for a subset of them (Python, TypeScript
 / JavaScript / JSX / TSX, PHP, C#, Go, C, C++, Java, Kotlin, Rust, Perl), and
 stores the result as a SQLite knowledge graph of files, symbols, and edges.
-Maestro uses it as a fourth structural opinion, independent of CGC's embedded
+Maestro uses it as one of four structural opinions, independent of CGC's embedded
 graph database, Graphify's portable JSON graph, and CodeGraph's SQLite index:
 its query surface adds a git-diff-to-blast-radius tool (`detect_changes`), a
 read-only Cypher-like query tool, and a persistent Architecture Decision
