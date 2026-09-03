@@ -12,8 +12,7 @@ maintains a temporal knowledge graph whose facts can be added, invalidated,
 and superseded over time. Maestro uses it because durable cross-session memory
 needs exactly that shape — bounded recall at session start, capture at
 lifecycle events, mining of pushed documentation — while the provider remains
-replaceable: the memory protocol v1 envelope is the stable contract, and
-MemPalace vocabulary never leaks past its adapter.
+replaceable: MemPalace vocabulary never leaks past this documented boundary.
 
 ## Vocabulary mapping
 
@@ -36,7 +35,7 @@ MemPalace vocabulary never leaks past its adapter.
 | --- | --- |
 | Package | `mempalace` v3.8.0 (uv tool) |
 | CLI | `mempalace` |
-| MCP server | `mempalace-mcp` — registered in the governed Pi MCP configuration |
+| MCP server | `mempalace-mcp` — registered in the governed shared MCP configuration |
 | Store | `<workspace>/.maestro/state/providers/mempalace` (native home; `~/.mempalace` is a filesystem alias) |
 | Repository identity | `<workspace>/.maestro/state/providers/mempalace/identity.txt` (stable L0 identity per estate repository) |
 

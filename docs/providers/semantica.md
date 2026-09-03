@@ -12,7 +12,7 @@ Semantica provides semantic graph search and reasoning alongside the structural
 CGC graph, the repository Graphify graph, and durable MemPalace memory. The
 initial workspace-global graph is seeded only from `maestro-core` through
 Semantica's native repository ingestion. The provider remains replaceable and
-its vocabulary stays within this adapter and documentation.
+its vocabulary stays within this documented boundary.
 
 ## Vocabulary mapping
 
