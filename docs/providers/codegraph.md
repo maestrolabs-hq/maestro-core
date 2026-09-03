@@ -1,9 +1,9 @@
 # CodeGraph
 
-CodeGraph maintains a third independent repository graph — alongside CGC and
-Graphify — built by a native Rust kernel and served from an in-repo SQLite
-database. Identities, indexes, scores, and results are never merged across
-providers.
+CodeGraph maintains a third independent repository graph — alongside CGC,
+Graphify, and Codebase-Memory — built by a native Rust kernel and served from
+an in-repo SQLite database. Identities, indexes, scores, and results are
+never merged across providers.
 
 ## What it does and why Maestro uses it
 
@@ -12,11 +12,11 @@ CodeGraph parses source with tree-sitter grammars compiled into a Rust kernel
 by the same extraction logic), storing symbols, edges, and files in a local
 SQLite database with FTS5 full-text search. A file watcher keeps the index
 current on every save, so a query never triggers its own indexing pass.
-Maestro uses it as a third structural opinion, independent of CGC's embedded
-graph database and Graphify's portable JSON graph: CodeGraph's single MCP
-tool returns verbatim source grouped by file plus the call path and blast
-radius in one call, which is a different query shape from the other two
-providers and is not merged with either.
+Maestro uses it as one of four structural opinions, independent of CGC's
+embedded graph database, Graphify's portable JSON graph, and Codebase-Memory's
+SQLite index: CodeGraph's single MCP tool returns verbatim source grouped by
+file plus the call path and blast radius in one call, which is a different
+query shape from the other providers and is not merged with any of them.
 
 ## Vocabulary mapping
 
