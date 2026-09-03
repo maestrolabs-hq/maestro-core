@@ -8,3 +8,4 @@ registered as an MCP server, and none is discovered as an executable on `PATH`.
 | --- | --- | --- |
 | [Archify](./archify.md) | Renders architecture, workflow, sequence, and state diagrams as self-contained HTML | `tt-a1i/archify` |
 | [Impeccable](./impeccable.md) | Design guidance for agent-built frontends: 23 commands and 61 deterministic detector rules | `pbakaus/impeccable` |
+| [Understand Anything](./understand-anything.md) | LLM-generated teaching graph with guided tours and a local dashboard | `Egonex-AI/Understand-Anything` |
