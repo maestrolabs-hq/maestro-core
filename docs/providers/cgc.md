@@ -1,8 +1,8 @@
 # CodeGraphContext (CGC)
 
-CGC maintains the workspace-context code graph — one of two independent
-repository graphs (the other is Graphify). Identities, indexes, scores, and
-results are never merged.
+CGC maintains the workspace-context code graph — one of three independent
+repository graphs (the others are Graphify and CodeGraph). Identities,
+indexes, scores, and results are never merged.
 
 ## What it does and why Maestro uses it
 
@@ -42,7 +42,7 @@ The MCP server takes no CLI options; database selection uses environment
 variables with highest precedence:
 
 ```json
-"codegraph": {
+"cgc": {
   "command": "cgc",
   "args": ["mcp", "start"],
   "env": {

@@ -1,8 +1,8 @@
 # Graphify
 
-Graphify maintains the repository-graph — one of two independent repository
-graphs (the other is CGC). It also performs optional LLM semantic extraction
-of documents through local OpenAI-compatible endpoints.
+Graphify maintains the repository-graph — one of three independent repository
+graphs (the others are CGC and CodeGraph). It also performs optional LLM
+semantic extraction of documents through local OpenAI-compatible endpoints.
 
 ## What it does and why Maestro uses it
 
