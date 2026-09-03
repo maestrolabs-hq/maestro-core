@@ -79,3 +79,7 @@ Desktop.ini
 /plan.out
 /audit.txt
 /audit.err
+
+# Agent and tool state.
+.worktrees/
+.superpowers/

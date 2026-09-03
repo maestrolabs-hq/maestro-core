@@ -92,9 +92,16 @@ No absolute path is written anywhere — not in code, configuration, task runner
 workflow. Paths derive from the operating system at run time. See
 [ADR-0001](./adr/0001-paths-are-derived-never-written.md).
 
-This is currently enforced by review and the absence of literals, not by a gate.
-That is a known weakness: properly testing it means exercising Windows, macOS and
-Linux.
+Both halves are now gated. `common / no-absolute-paths` refuses a path that
+names a machine — a home directory, a drive letter, a user profile — while
+allowing `/usr`, `/opt`, `/etc`, `/var` and `/tmp`, which name a platform.
+`fast / cross-platform` builds and tests on Windows and macOS on every pull
+request, so the derivation is exercised on the systems it exists for rather
+than asserted.
+
+This paragraph previously recorded the opposite, and it was right to: for a
+while the rule was enforced by review and the absence of literals, and said so
+instead of claiming a gate it did not have.
 
 ## Not yet in place
 

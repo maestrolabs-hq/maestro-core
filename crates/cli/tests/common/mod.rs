@@ -24,7 +24,12 @@ pub fn sources() -> Vec<PathBuf> {
             let p = e.path();
             let name = e.file_name();
             let name = name.to_string_lossy();
-            if name == "target" || name == ".git" || name == "node_modules" {
+            if name == "target"
+                || name == ".git"
+                || name == "node_modules"
+                || name == ".worktrees"
+                || name == ".superpowers"
+            {
                 continue;
             }
             if p.is_dir() {

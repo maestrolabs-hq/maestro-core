@@ -30,11 +30,24 @@ fn contains_word(haystack: &str, needle: &str) -> bool {
     })
 }
 
-fn scan(banned: &[(&str, &str)], skip_self: bool) -> Vec<String> {
+fn scan(banned: &[(&str, &str)], skip_self: bool, allow_tooling_docs: bool) -> Vec<String> {
     let root = repo_root();
+    let allowed_tooling_docs = [
+        root.join("docs").join("providers"),
+        root.join("docs").join("skills"),
+        root.join("docs").join("tools"),
+    ];
     let mut found = Vec::new();
     for path in sources() {
         if skip_self && path.ends_with("vocabulary.rs") {
+            continue;
+        }
+        // Provider-specific documentation is the explicit adapter boundary.
+        if allow_tooling_docs
+            && allowed_tooling_docs
+                .iter()
+                .any(|allowed| path.starts_with(allowed))
+        {
             continue;
         }
         let Ok(text) = fs::read_to_string(&path) else {
@@ -65,8 +78,10 @@ fn no_sink_implementation_is_named() {
         ("mempalace", "names a memory sink; say 'a memory sink'"),
         ("graphify", "names a graph sink; say 'a graph sink'"),
         ("codegraphcontext", "names a graph sink; say 'a graph sink'"),
+        ("semantica", "names a graph sink; say 'a graph sink'"),
+        ("cgc", "names a graph sink; say 'a graph sink'"),
     ];
-    let found = scan(&banned, true);
+    let found = scan(&banned, true, true);
     assert!(
         found.is_empty(),
         "Maestro named a sink implementation:\n\n{}\n",
@@ -87,7 +102,7 @@ fn no_sink_vocabulary_is_borrowed() {
         ("drawer", "a sink's storage vocabulary; say 'record'"),
         ("palace", "a sink's storage vocabulary; say 'store'"),
     ];
-    let found = scan(&banned, true);
+    let found = scan(&banned, true, true);
     assert!(
         found.is_empty(),
         "Maestro borrowed a sink's vocabulary:\n\n{}\n",
@@ -118,7 +133,7 @@ fn no_retired_wording_survives() {
             "retired: 'consumer' became 'sink' when the crate was renamed",
         ),
     ];
-    let found = scan(&banned, true);
+    let found = scan(&banned, true, false);
     assert!(
         found.is_empty(),
         "A decision retired this wording, and it came back:\n\n{}\n",

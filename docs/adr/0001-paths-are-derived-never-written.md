@@ -43,9 +43,16 @@ cannot: a derived path that resolves to the wrong place fails on every machine
 rather than one. The mitigation is that path derivation is checked, and
 `just doctor` prints what actually resolved instead of what was intended.
 
-Testing this properly means exercising all three platforms. Until then the rule
-is enforced by review and by the absence of literals, not by a gate — a known
-weakness rather than a claim of coverage.
+Testing this properly means exercising all three platforms, which the estate
+now does: `fast / cross-platform` builds and tests on Windows and macOS on
+every pull request, and `common / no-absolute-paths` refuses a literal that
+names a machine. Until those existed the rule was enforced by review and by
+the absence of literals, and this paragraph said so rather than claiming
+coverage it did not have.
+
+What remains outside a gate is the shape of the rule rather than its letter. A
+derived path can still resolve somewhere wrong on a platform nobody ran, and
+no grep for absolute literals will notice.
 
 ## Non-goals
 
