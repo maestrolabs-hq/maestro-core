@@ -40,7 +40,6 @@ boundaries and their names will be known rather than guessed.
 - [CONTEXT.md](./CONTEXT.md) — glossary
 - [docs/supervisor.md](./docs/supervisor.md) — residency, delegation, accountability (design; no crate yet)
 - [docs/protocol.md](./docs/protocol.md) — request and answer
-- [docs/ledger.md](./docs/ledger.md) — durability, states, retry (design; no crate)
 
 ## CLI shape
 
@@ -48,7 +47,6 @@ Noun-verb, after herdr. The command is designed as a thin client over the
 supervisor described in `docs/supervisor.md`; neither is built.
 
 ```text
-maestro memory   capture | recall | status | drain
 maestro status | completion <shell>
 ```
 

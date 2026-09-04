@@ -55,39 +55,9 @@ from hope.
 
 ## Ledger *(designed)*
 
-The durable record of what Maestro is accountable for. Written before the thing
-it records is acted on, so a crash cannot erase what was promised. The ledger,
-not memory, is what Maestro answers questions from.
+The durable record of what Maestro is accountable for: delegations, refusals
+and handoffs, written before the thing they record is acted on, so a crash
+cannot erase what was promised. The ledger, not memory, is what Maestro
+answers questions from.
 
-The shape is written down in `docs/ledger.md` and no crate implements it. It
-covers material accepted and awaiting delivery; delegations, refusals and
-handoffs belong there too and have no shape yet.
-
-## Sink *(designed)*
-
-A downstream destination for recorded material: memory, observability, outward
-bridges. Sinks are reached over MCP. A sink is never a runtime dependency —
-Maestro records and acknowledges whether or not any sink is reachable.
-
-## Delivery *(designed)*
-
-Handing recorded material to a sink. Happens after acknowledgement, and may fail
-without losing the record.
-
-## Dead letter *(designed)*
-
-A record whose delivery attempts are exhausted. Parked, still visible, still
-drainable. Nothing is ever dropped.
-
-## Recall *(designed)*
-
-Returning previously recorded material to a client. Bounded, because the
-requester spends its own context on the result.
-
-## Scope
-
-The project a record belongs to, and the unit recall is bounded by. Recall
-returns a project's own material and not another's.
-
-How a sink files that internally is the sink's business. Maestro carries the
-scope and does not model the filing.
+Its shape is deferred until a delegation contract exists to give it one.
