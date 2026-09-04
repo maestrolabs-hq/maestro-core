@@ -94,6 +94,17 @@ agent name rather than relying on whichever pane the UI happens to have
 focused. IDs are parsed from JSON responses, not guessed from sidebar order.
 `herdr server stop` is never run from an active session.
 
+**Explicit defaults we rely on.** Three defaults matter enough to name
+rather than leave implicit. `session.resume_agents_on_restore` stays at its
+default `true` — it is load-bearing for the durability posture above, not an
+incidental setting. `advanced.scrollback_limit_bytes` stays at its default
+10 MB per pane; a busy lane's rendered output can exceed that, but Pi's own
+session file is unaffected, so this is revisited only if a lane shows
+truncated terminal output, not preemptively. Pi's own
+`subagents.watchdog.enabled` stays `false` in `~/.pi/agent/settings.json` —
+left off deliberately for now, revisited as the concurrent-lane count grows
+and a frozen subagent becomes more likely to go unnoticed.
+
 ## Installed integrations
 
 The Herdr–Pi surface currently in use, all verified live:
@@ -103,8 +114,9 @@ The Herdr–Pi surface currently in use, all verified live:
 | Pi lifecycle + session integration | managed Pi extension `herdr-agent-state.ts` (`HERDR_INTEGRATION_ID=pi`), reporting `pane.report_agent` and `pane.report_agent_session` over the Herdr socket | authoritative `idle`/`working`/`blocked` state without screen-scraping, plus a native session reference so a Pi conversation resumes after a Herdr server restart |
 | Pi task reporter | user Pi extension `herdr-task-title.ts` beside the managed file (source `user:pi-task`), reporting `pane.report_metadata` tokens | the first line of each submitted prompt becomes a display-only `task` token, rendered by the `$task` sidebar row — the agent panel reads as a task board |
 | Annotate plugin | Herdr plugin `plannotator/herdr-annotate` (pinned commit) with actions, popup panes, and a Markdown link handler | annotate terminal selections, review an agent's last message, and send feedback back to the agent — see [`docs/tools/plannotator.md`](./plannotator.md) |
+| Herdr Sidebar plugin | Herdr plugin `alexarthurs/herdr-sidebar` (pinned commit `4faeea73`), a VS Code-style dockable pane | file explorer and git source control in one pane — syntax-highlighted previews, diffs, staging, and an experimental inline editor; toggled with `prefix+b` |
 | Herdr control skill | Pi skill driving the `herdr` CLI, pinned to the installed binary version | lets a Pi session inspect and control panes, tabs, workspaces, and sibling agents from inside a pane — see [`docs/skills/herdr.md`](../skills/herdr.md) |
-| Config surface | `~/.config/herdr/config.toml` | worktree checkout root, priority agent-panel sort, terminal-delivered toast notifications for background `blocked`/`done`, and the `$task` sidebar row layout |
+| Config surface | `~/.config/herdr/config.toml` | worktree checkout root, priority agent-panel sort, symbol status indicators, terminal-delivered toast notifications for background `blocked`/`done` with sound notifications explicitly disabled, the `$task` sidebar row layout, the annotate and herdr-sidebar plugin keybindings, and agent-cycling keys (`next_agent`/`previous_agent`/`focus_agent`) rebound around the two plugins' key collisions with Herdr's own defaults |
 
 ## Potential integrations
 
