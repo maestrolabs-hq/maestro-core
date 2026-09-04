@@ -9,33 +9,6 @@ the only one that has not started.
 
 ---
 
-## P0 -- ship one command end to end
-
-### 1. `maestro memory capture`
-
-`docs/protocol.md` fixes the envelope. `docs/spool.md` fixes the table. Neither
-has a caller.
-
-Build the thinnest path that works, test-first:
-
-- accept an envelope on stdin
-- validate it against the protocol
-- append it to the spool
-- exit non-zero if it could not be durably stored
-
-No supervisor, no delivery, no retries. Those are `docs/supervisor.md` and they
-stay designs until something is actually queuing.
-
-The point is to stop being a repository of intentions. One command that does
-one thing beats four documents describing five that do not exist.
-
-### 2. Then: the smallest thing that drains the spool
-
-Once capture works, a drain proves the envelope survives a round trip. That is
-the moment the protocol version stops being a guess.
-
----
-
 ## P1 -- open design questions the docs do not answer
 
 ### 0. Should the three verbs move under one `maestro` CLI?
@@ -73,18 +46,12 @@ not write.
 ### 3. "Never waiting" has no worker or concurrency model
 
 The supervisor design says the CLI never waits. Nothing says how many workers
-drain the spool, what happens when one wedges, or how a second `maestro`
+handle recorded work, what happens when one wedges, or how a second `maestro`
 process on the same machine interacts with the first.
 
-This is the question that decides whether the spool needs row-level locking or
-just an append-only file. It should be answered before the table is built, not
-after.
-
-### 4. `protocol` is frozen at `v: 1` but scoped to memory
-
-The envelope was designed for one kind of payload and given a version number
-that implies it covers all of them. Either widen it deliberately or say it is
-memory-specific and let other domains have their own.
+This is the question that decides how the ledger is stored -- row-level
+locking, an append-only file, or something else. It should be answered before
+any of it is built, not after.
 
 ---
 
@@ -246,8 +213,8 @@ be unarguably first at it:
 
 Nothing in the agent tooling space does this well. Frameworks optimise for
 authoring; almost none can answer "what exactly did this agent do last Tuesday,
-and would it do the same today." The spool is already the right shape for it --
-it is a durable record of handovers, which is the raw material of an audit log.
+and would it do the same today." A durable record of handovers is the raw
+material of an audit log.
 
 That is a real gap, it is defensible, and it is worth more the longer it runs.
 
@@ -273,15 +240,13 @@ The best tools win incidents. When an agent does something unexpected, the
 question is always the same: *what happened, in what order, and why.*
 
 If `maestro replay <id>` answers that in one command, adoption follows without
-marketing. Everything in the design -- durable spool, fixed envelope, recorded
+marketing. Everything in the design -- a durable ledger and recorded
 handovers -- already points at this. It has simply not been built.
 
 ### What would make this fail
 
-- **Building the supervisor before the spool has a caller.** The most likely
-  failure is another six months of excellent documents.
-- **Widening scope before one command is loved.** Memory, then nothing else,
-  until memory is boring.
+- **Building the supervisor before anything real depends on it.** The most
+  likely failure is another six months of excellent documents.
 - **Letting the docs drift ahead of the code again.** That already happened
   once. The prose gate catches vocabulary; nothing catches "this paragraph
   describes software that does not exist." A test that fails when a doc claims
@@ -376,8 +341,6 @@ attribute.
 
 ### 17. Documents against code
 
-- `protocol.md` defines a verb and a field that `ledger.md` cannot serve.
-- The P0 task points at a document that has never existed.
 - `quality-bar.md` contradicts itself and lists a gate with nothing to check.
 - ADR-0001's decision text is stricter than the gate now claiming to enforce it.
 - `rust-version = "1.85"` is declared and inherited by nothing.

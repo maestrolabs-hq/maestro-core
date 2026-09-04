@@ -72,8 +72,8 @@ required.
 
 ## Accountability
 
-Every delegation, refusal, handoff and delivery is recorded in the ledger before
-it is acted on. The ledger is the record Maestro answers questions from — not
+Every delegation, refusal and handoff is recorded in the ledger before it is
+acted on. The ledger is the record Maestro answers questions from — not
 in-memory state, which a crash would take with it.
 
 Visibility is not a reporting feature bolted on afterwards. It is the reason the
@@ -81,22 +81,19 @@ ledger is written first.
 
 ## Crates
 
-Three exist:
+Two exist:
 
 | Crate | Owns |
 | --- | --- |
 | `protocol` | what a client may ask, and what Maestro answers |
-| `ledger` | the durable record of what Maestro is accountable for |
 | `cli` | the `maestro` binary |
 
-The supervisor, its policy and its sinks are described in this document and are
-not crates. They were, briefly: six crates were created before anything needed
-them, and a seam is only real when something varies across it. Nothing did. They
-come back when code asks for them, which is also when their boundaries will be
-known rather than guessed.
+The supervisor, the ledger, its policy and its sinks are described in this
+document and are not crates. They were, briefly: six crates were created
+before anything needed them, and a seam is only real when something varies
+across it. Nothing did. They come back when code asks for them, which is also
+when their boundaries will be known rather than guessed.
 
 Handoff contracts, refusals and routing are all rules about what is allowed or
 required. Whether they are one module or three is not yet knowable, and guessing
 produced three empty crates once already.
-
-Delivery to a sink is one use of the ledger, not the shape of the system.

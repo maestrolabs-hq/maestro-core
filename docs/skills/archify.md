@@ -1,8 +1,8 @@
 # Archify
 
-Archify is the architecture renderer behind the planned `maestro architecture`
-facade. It turns plain-language descriptions, repository evidence, or pasted
-Mermaid into polished, validated diagrams delivered as self-contained HTML.
+Archify is the estate's standalone architecture renderer. It turns
+plain-language descriptions, repository evidence, or pasted Mermaid into
+polished, validated diagrams delivered as self-contained HTML.
 
 ## What it does and why Maestro uses it
 
@@ -51,7 +51,8 @@ diagrams can be grounded in code rather than drawn from memory.
 In any agent that loads the skill (Pi after a reload):
 
 ```text
-Use Archify to draw: Pi -> Maestro CLI -> Supervisor -> SQLite ledger -> worker -> a memory sink
+Use Archify to draw: pi session A -> maestro supervisor <- pi session B, with the
+supervisor holding live delegations, outstanding handoffs, and per-project state
 ```
 
 With a repository open, ask for a diagram grounded in the sources; the skill
@@ -61,9 +62,5 @@ inspects code as evidence. Mermaid `flowchart`, `sequenceDiagram`, and
 ## Notes
 
 - Archify is never registered with Pi's MCP registry; it is a skill, not a server.
-- The workspace-intelligence spec assumed an `archify` executable discovered on
-  `PATH`. The official distribution is a skill; the `maestro architecture`
-  adapter design must be revised to invoke the skill's Node renderer (or
-  delegate to the agent) before implementation.
 - `maestro-pi-config` records the reviewed release but never downloads or
   installs it; the operator supplies the skill through the official installer.
