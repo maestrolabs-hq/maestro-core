@@ -7,6 +7,7 @@ registered as an MCP server, and none is discovered as an executable on `PATH`.
 | Skill page | Role | Upstream |
 | --- | --- | --- |
 | [Archify](./archify.md) | Renders architecture, workflow, sequence, and state diagrams as self-contained HTML | `tt-a1i/archify` |
+| [Herdr](./herdr.md) | Drives the `herdr` CLI to inspect and control terminal panes, tabs, workspaces, and agents from inside a Herdr-managed session | `herdrdev/herdr` |
 | [Impeccable](./impeccable.md) | Design guidance for agent-built frontends: 23 commands and 61 deterministic detector rules | `pbakaus/impeccable` |
 | [Rust MCP Server Generator](./rust-mcp-server-generator.md) | Scaffolds a Rust MCP server project with the official rmcp SDK (generator; dormant until the estate authors one) | `github/awesome-copilot` |
 | [Rust Skills](./rust-skills.md) | Idiomatic Rust review guidance, 265 rules current for the 2024 edition | `leonardomso/rust-skills` |
