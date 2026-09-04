@@ -35,6 +35,7 @@ skill drives agent-to-agent coordination through it.
 | Distribution | a standalone binary the operator installs via the official installer (or Homebrew/mise/Nix); not an MCP server, and not itself a Pi skill |
 | Installed | `herdr` 0.8.2 at `~/.local/bin/herdr` |
 | Config/state root | `~/.config/herdr/` — `config.toml`, server and client logs, `session.json` (live workspace/tab/pane topology), `herdr.sock` / `herdr-client.sock`, `plugins/` |
+| Config capture | `config.toml` and the installed plugin pins are captured in the `maestro-herdr-config` repository, mirroring the `maestro-pi-config` pattern for this machine's Pi configuration |
 | Environment | `HERDR_ENV=1` is set inside a Herdr-managed pane; this is both the human-visible confirmation and the control skill's own activation guard that the calling process runs inside one |
 
 ## CLI surface
@@ -115,6 +116,9 @@ The Herdr–Pi surface currently in use, all verified live:
 | Pi task reporter | user Pi extension `herdr-task-title.ts` beside the managed file (source `user:pi-task`), reporting `pane.report_metadata` tokens | the first line of each submitted prompt becomes a display-only `task` token, rendered by the `$task` sidebar row — the agent panel reads as a task board |
 | Annotate plugin | Herdr plugin `plannotator/herdr-annotate` (pinned commit) with actions, popup panes, and a Markdown link handler | annotate terminal selections, review an agent's last message, and send feedback back to the agent — see [`docs/tools/plannotator.md`](./plannotator.md) |
 | Herdr Sidebar plugin | Herdr plugin `alexarthurs/herdr-sidebar` (pinned commit `4faeea73`), a VS Code-style dockable pane | file explorer and git source control in one pane — syntax-highlighted previews, diffs, staging, and an experimental inline editor; toggled with `prefix+b` |
+| reviewr plugin | Herdr plugin `persiyanov/herdr-reviewr` (pinned commit `4c090225`) | reviews an agent-written diff beside the chat with inline line comments sent back to the agent, plus a read-only view of the branch's PR, its checks, and comments |
+| Herdr Navigator plugin | Herdr plugin `thanhdat77/herdr-navigator` (pinned tag `v0.3.3`, commit `03b803a0`) | fuzzy jump to any workspace, agent, project, session, remote, directory, or action from one picker, instead of hunting through the sidebar |
+| GitHub PR Status plugin | Herdr plugin `wyattjoh/herdr-plugin-gh-pr` (pinned commit `6fe22de9`) | labels the focused agent pane's sidebar row with its branch's GitHub PR status, refreshed on pane focus and worktree creation/open |
 | Herdr control skill | Pi skill driving the `herdr` CLI, pinned to the installed binary version | lets a Pi session inspect and control panes, tabs, workspaces, and sibling agents from inside a pane — see [`docs/skills/herdr.md`](../skills/herdr.md) |
 | Config surface | `~/.config/herdr/config.toml` | worktree checkout root, priority agent-panel sort, symbol status indicators, terminal-delivered toast notifications for background `blocked`/`done` with sound notifications explicitly disabled, the `$task` sidebar row layout, the annotate and herdr-sidebar plugin keybindings, and agent-cycling keys (`next_agent`/`previous_agent`/`focus_agent`) rebound around the two plugins' key collisions with Herdr's own defaults |
 
