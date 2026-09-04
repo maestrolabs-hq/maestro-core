@@ -94,6 +94,60 @@ agent name rather than relying on whichever pane the UI happens to have
 focused. IDs are parsed from JSON responses, not guessed from sidebar order.
 `herdr server stop` is never run from an active session.
 
+## Installed integrations
+
+The Herdr–Pi surface currently in use, all verified live:
+
+| Integration | Mechanism | What it provides |
+| --- | --- | --- |
+| Pi lifecycle + session integration | managed Pi extension `herdr-agent-state.ts` (`HERDR_INTEGRATION_ID=pi`), reporting `pane.report_agent` and `pane.report_agent_session` over the Herdr socket | authoritative `idle`/`working`/`blocked` state without screen-scraping, plus a native session reference so a Pi conversation resumes after a Herdr server restart |
+| Pi task reporter | user Pi extension `herdr-task-title.ts` beside the managed file (source `user:pi-task`), reporting `pane.report_metadata` tokens | the first line of each submitted prompt becomes a display-only `task` token, rendered by the `$task` sidebar row — the agent panel reads as a task board |
+| Annotate plugin | Herdr plugin `plannotator/herdr-annotate` (pinned commit) with actions, popup panes, and a Markdown link handler | annotate terminal selections, review an agent's last message, and send feedback back to the agent — see [`docs/tools/plannotator.md`](./plannotator.md) |
+| Herdr control skill | Pi skill driving the `herdr` CLI, pinned to the installed binary version | lets a Pi session inspect and control panes, tabs, workspaces, and sibling agents from inside a pane — see [`docs/skills/herdr.md`](../skills/herdr.md) |
+| Config surface | `~/.config/herdr/config.toml` | worktree checkout root, priority agent-panel sort, terminal-delivered toast notifications for background `blocked`/`done`, and the `$task` sidebar row layout |
+
+## Potential integrations
+
+Mechanisms Herdr exposes that the estate does not use yet, recorded so a
+future decision starts from the full list rather than a shortlist. Ordered
+roughly by expected payoff.
+
+1. **Socket event subscription → audit spool bridge.** The socket API
+   supports long-lived event subscriptions; a small subscriber could record
+   every lane's state transitions and session references into the estate's
+   spool, extending "every delegation is recorded and auditable" from
+   pi-subagents to Herdr-level lanes. Cost: a daemon to own.
+2. **Estate plugin with a "new lane" action.** A `herdr-plugin.toml` action
+   that creates the worktree, splits a pane, starts a named Pi, and prompts
+   it as one keybound step, replacing the manual five-step flow.
+3. **Plugin event hooks.** The same plugin can react to session events such
+   as worktree creation to bootstrap a lane automatically; pairs with the
+   action above rather than standing alone.
+4. **Workspace-level status tokens.** The metadata mechanism already used
+   for `$task`, at workspace scope: a periodic reporter could surface
+   `governance plan` drift or ahead/behind counts per repo in the Spaces
+   sidebar, turning it into an estate health board.
+5. **Richer per-lane metadata.** `pane.report_metadata` also carries
+   `state_labels` and `display_agent`, so a lane could show
+   `working="reviewing PR"` instead of the bare state word; same mechanism
+   as the task token, purely presentational.
+6. **Tab-bar command widgets.** `tab_bar_right` runs a script on an
+   interval; a blocked-lane count or drift flag could stay permanently
+   visible. Trivial to add.
+7. **Custom command keybindings.** Popup scratch terminal, a lazygit popup
+   once lazygit is installed, and `plugin_action` bindings for the estate
+   plugin's actions.
+8. **Direct attach for remote check-ins.** `herdr agent attach <name>` from
+   any terminal, including over SSH, opens one lane without the full UI.
+   A habit rather than a setup.
+9. **Named test sessions.** Isolated scratch servers for experiments that
+   must not touch the live session; already part of the control skill's
+   safety rules, unused as a workflow.
+10. **Pane screen history — considered and declined.** It would replay pane
+    contents after a restart but persists terminal output (including
+    secrets) to disk; native Pi session resume already covers the restart
+    case, so the trade-off is not worth taking.
+
 ## Notes
 
 - **Integrated with the estate's subagent tooling.** When a session already
