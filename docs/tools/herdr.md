@@ -46,6 +46,54 @@ than work from a memorized copy. `herdr --default-config` prints the full
 default configuration; `herdr status` summarizes server and client runtime
 state.
 
+## Operating conventions (Pi in Herdr)
+
+Pi is a first-class Herdr agent: the managed extension `herdr-agent-state.ts`
+(`HERDR_INTEGRATION_ID=pi`) reports lifecycle state directly, so Herdr does
+not fall back to screen-scraping to tell `idle`, `working`, and `blocked`
+apart, and it holds a native session reference that lets a Pi conversation
+resume after a Herdr server restart rather than only after a client
+detach/reattach. Do not edit that managed file; add custom hooks beside it
+if needed, since reinstalling or updating the integration overwrites it.
+
+**Topology: one workspace per repo, worktree lanes as grouped children.**
+Each repo gets one Herdr workspace. Parallel branch work uses the sidebar's
+worktree actions rather than a second checkout managed by hand: `New
+worktree` creates the checkout under `[worktrees] directory` (for example
+`~/.herdr/worktrees/<repo>/<branch-slug>`) and opens it as a new workspace
+grouped under the source workspace. This maps directly onto the estate's
+PR-only, topic-branch flow — one lane, one branch, one workspace.
+
+**Two-tier delegation.** Use a Herdr agent pane for a lane that is
+supervised or interactive: a long-lived conductor Pi per repo, a reviewer to
+be cross-examined, a dev server watched for output. Use pi-subagents for
+headless, structured fanout instead, since that work stays auditable in the
+estate's spool without adding sidebar rows. Rule of thumb: if it will be
+watched or talked to, it is a Herdr pane; if it is fire-and-forget with a
+structured result, it is a pi-subagent.
+
+**Sidebar as the triage surface.** `agent_panel_sort = "priority"` puts
+lanes needing attention first. A lane may self-report a display-only task
+label with `herdr pane report-metadata "$HERDR_PANE_ID" --source
+user:pi-title --token task="..." --ttl-ms 3600000`, rendered through the
+`$task` sidebar row token. Metadata is presentation only and never overrides
+the integration's semantic `idle`/`working`/`blocked` state.
+
+**Durability posture.** Detach and reattach preserve everything for free.
+A server restart restores layout, and a Pi pane resumes its conversation
+natively through the integration rather than needing a manual re-launch.
+Update the server with `--handoff` so a best-effort live handoff keeps
+running agents attached through the update. Pane screen history
+(`pane_history`) stays off deliberately: it persists pane contents to disk,
+a security trade-off not worth taking on panes that display tokens and other
+secrets, and native session resume already covers the common restart case.
+
+**Safety.** Background spawns use `--no-focus` so the operator's focus does
+not move. Commands target `--current`, an explicit pane ID, or a unique
+agent name rather than relying on whichever pane the UI happens to have
+focused. IDs are parsed from JSON responses, not guessed from sidebar order.
+`herdr server stop` is never run from an active session.
+
 ## Notes
 
 - **Integrated with the estate's subagent tooling.** When a session already
