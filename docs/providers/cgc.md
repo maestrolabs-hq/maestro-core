@@ -68,9 +68,10 @@ native MCP server and native CLI.
 | Command | Purpose |
 | --- | --- |
 | `cgc doctor` | Diagnostics (backend, parsers, permissions) |
-| `cgc --db kuzudb --db-path <p> stats` | Node counts by kind |
-| `cgc --db kuzudb --db-path <p> list` | Indexed repositories |
-| `cgc index / update / clean / delete` | Mutating provider-native operations |
+| `cgc --db kuzudb --path <p> stats` | Node counts by kind |
+| `cgc --db kuzudb --path <p> list` | Indexed repositories |
+| `cgc --db kuzudb --path <p> index <repo-path> --summarize` | The only working indexer. `--db`/`--path` are global options that must precede the subcommand, not `index` flags, and are read only by the CLI (the MCP server instead reads `CGC_RUNTIME_DB_TYPE`/`CGC_RUNTIME_DB_PATH`). KuzuDB is single-writer: the CLI fails with a lock error while the MCP server is connected, so the server must be stopped first, indexing run per repository, then the server left to respawn lazily on its next MCP call |
+| `cgc update / clean / delete` | Other mutating provider-native operations |
 | `cgc report / diagram / visualize` | Reporting and rendering |
 | `cgc mcp start` | MCP server (stdio) |
 
@@ -78,7 +79,7 @@ native MCP server and native CLI.
 
 | Tool | Description | Tested |
 | --- | --- | --- |
-| `add_code_to_graph` | Performs a one-time scan of a local folder to add its code to the graph. | skipped (mutating) |
+| `add_code_to_graph` | Performs a one-time scan of a local folder to add its code to the graph. | cannot index a repository that is not already in the graph: fails opaquely ("Tool execution error") and creates no job (`list_jobs` stays empty, `list_indexed_repositories` unchanged); returns cleanly only as a no-op ("already indexed") on a repo already present. Not a usable indexer on this deployment — use the CLI `index` invocation instead |
 | `check_job_status` | Check the status and progress of a background job. | verified |
 | `list_jobs` | List all background jobs and their current status. | verified |
 | `find_code` | Find relevant code snippets related to a keyword (e.g., function name, class name, or content). | not exercised |
