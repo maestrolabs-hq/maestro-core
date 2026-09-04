@@ -32,3 +32,6 @@ filesystem alias.
 | [Graphify](./graphify.md) | Portable repository graph and optional semantic extraction | `<workspace>/.maestro/state/providers/graphify/` |
 | [MemPalace](./mempalace.md) | Durable local memory and temporal knowledge graph | `<workspace>/.maestro/state/providers/mempalace/` |
 | [Semantica](./semantica.md) | Semantic context graph, decisions, and reasoning | `<workspace>/.maestro/state/providers/semantica/global-graph.json` |
+
+See [capabilities.md](./capabilities.md) for the full per-tool matrix across
+all seven providers, classified by fanout verb or single-provider scope.
