@@ -64,11 +64,11 @@ its own branch of the fanout cleanly rather than blocking the other six.
   workaround.** CodeGraph's MCP server exposes no indexing tool at all — a
   background watcher keeps its index current once `codegraph init` has run
   once. Graphify's MCP server is read-only by design; building or updating
-  its graph is a CLI-only operation (`graphify extract` / `graphify global
-  add`). Semantica's wired `semantica-mcp` server is likewise read/query-only
-  — repository ingestion is the native `semantica ingest --type repo`
-  command, not an MCP tool. All three facts come from the provider docs, not
-  from a limitation this skill introduces.
+  its graph is a CLI-only operation (`graphify update <path>`, adding `--force`
+  after refactors that delete code). Semantica's wired `semantica-mcp` server is
+  likewise read/query-only — repository ingestion is the native `semantica
+  ingest --type repo` command, not an MCP tool. All three facts come from the
+  provider docs, not from a limitation this skill introduces.
 - **Docling reports real `n/a` semantics.** Docling holds no repository
   index at all; its cache and status calls are always scoped to one
   already-converted document, never global.
