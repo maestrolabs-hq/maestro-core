@@ -35,6 +35,7 @@ skill drives agent-to-agent coordination through it.
 | Distribution | a standalone binary the operator installs via the official installer (or Homebrew/mise/Nix); not an MCP server, and not itself a Pi skill |
 | Installed | `herdr` 0.8.2 at `~/.local/bin/herdr` |
 | Config/state root | `~/.config/herdr/` — `config.toml`, server and client logs, `session.json` (live workspace/tab/pane topology), `herdr.sock` / `herdr-client.sock`, `plugins/` |
+| Config capture | `config.toml` and the installed plugin pins are captured in the `maestro-herdr-config` repository, mirroring the `maestro-pi-config` pattern for this machine's Pi configuration |
 | Environment | `HERDR_ENV=1` is set inside a Herdr-managed pane; this is both the human-visible confirmation and the control skill's own activation guard that the calling process runs inside one |
 
 ## CLI surface
@@ -93,6 +94,75 @@ not move. Commands target `--current`, an explicit pane ID, or a unique
 agent name rather than relying on whichever pane the UI happens to have
 focused. IDs are parsed from JSON responses, not guessed from sidebar order.
 `herdr server stop` is never run from an active session.
+
+**Explicit defaults we rely on.** Three defaults matter enough to name
+rather than leave implicit. `session.resume_agents_on_restore` stays at its
+default `true` — it is load-bearing for the durability posture above, not an
+incidental setting. `advanced.scrollback_limit_bytes` stays at its default
+10 MB per pane; a busy lane's rendered output can exceed that, but Pi's own
+session file is unaffected, so this is revisited only if a lane shows
+truncated terminal output, not preemptively. Pi's own
+`subagents.watchdog.enabled` stays `false` in `~/.pi/agent/settings.json` —
+left off deliberately for now, revisited as the concurrent-lane count grows
+and a frozen subagent becomes more likely to go unnoticed.
+
+## Installed integrations
+
+The Herdr–Pi surface currently in use, all verified live:
+
+| Integration | Mechanism | What it provides |
+| --- | --- | --- |
+| Pi lifecycle + session integration | managed Pi extension `herdr-agent-state.ts` (`HERDR_INTEGRATION_ID=pi`), reporting `pane.report_agent` and `pane.report_agent_session` over the Herdr socket | authoritative `idle`/`working`/`blocked` state without screen-scraping, plus a native session reference so a Pi conversation resumes after a Herdr server restart |
+| Pi task reporter | user Pi extension `herdr-task-title.ts` beside the managed file (source `user:pi-task`), reporting `pane.report_metadata` tokens | the first line of each submitted prompt becomes a display-only `task` token, rendered by the `$task` sidebar row — the agent panel reads as a task board |
+| Annotate plugin | Herdr plugin `plannotator/herdr-annotate` (pinned commit) with actions, popup panes, and a Markdown link handler | annotate terminal selections, review an agent's last message, and send feedback back to the agent — see [`docs/tools/plannotator.md`](./plannotator.md) |
+| Herdr Sidebar plugin | Herdr plugin `alexarthurs/herdr-sidebar` (pinned commit `4faeea73`), a VS Code-style dockable pane | file explorer and git source control in one pane — syntax-highlighted previews, diffs, staging, and an experimental inline editor; toggled with `prefix+b` |
+| reviewr plugin | Herdr plugin `persiyanov/herdr-reviewr` (pinned commit `4c090225`) | reviews an agent-written diff beside the chat with inline line comments sent back to the agent, plus a read-only view of the branch's PR, its checks, and comments |
+| Herdr Navigator plugin | Herdr plugin `thanhdat77/herdr-navigator` (pinned tag `v0.3.3`, commit `03b803a0`) | fuzzy jump to any workspace, agent, project, session, remote, directory, or action from one picker, instead of hunting through the sidebar |
+| GitHub PR Status plugin | Herdr plugin `wyattjoh/herdr-plugin-gh-pr` (pinned commit `6fe22de9`) | labels the focused agent pane's sidebar row with its branch's GitHub PR status, refreshed on pane focus and worktree creation/open |
+| Herdr control skill | Pi skill driving the `herdr` CLI, pinned to the installed binary version | lets a Pi session inspect and control panes, tabs, workspaces, and sibling agents from inside a pane — see [`docs/skills/herdr.md`](../skills/herdr.md) |
+| Config surface | `~/.config/herdr/config.toml` | worktree checkout root, priority agent-panel sort, symbol status indicators, terminal-delivered toast notifications for background `blocked`/`done` with sound notifications explicitly disabled, the `$task` sidebar row layout, the annotate and herdr-sidebar plugin keybindings, and agent-cycling keys (`next_agent`/`previous_agent`/`focus_agent`) rebound around the two plugins' key collisions with Herdr's own defaults |
+
+## Potential integrations
+
+Mechanisms Herdr exposes that the estate does not use yet, recorded so a
+future decision starts from the full list rather than a shortlist. Ordered
+roughly by expected payoff.
+
+1. **Socket event subscription → audit spool bridge.** The socket API
+   supports long-lived event subscriptions; a small subscriber could record
+   every lane's state transitions and session references into the estate's
+   spool, extending "every delegation is recorded and auditable" from
+   pi-subagents to Herdr-level lanes. Cost: a daemon to own.
+2. **Estate plugin with a "new lane" action.** A `herdr-plugin.toml` action
+   that creates the worktree, splits a pane, starts a named Pi, and prompts
+   it as one keybound step, replacing the manual five-step flow.
+3. **Plugin event hooks.** The same plugin can react to session events such
+   as worktree creation to bootstrap a lane automatically; pairs with the
+   action above rather than standing alone.
+4. **Workspace-level status tokens.** The metadata mechanism already used
+   for `$task`, at workspace scope: a periodic reporter could surface
+   `governance plan` drift or ahead/behind counts per repo in the Spaces
+   sidebar, turning it into an estate health board.
+5. **Richer per-lane metadata.** `pane.report_metadata` also carries
+   `state_labels` and `display_agent`, so a lane could show
+   `working="reviewing PR"` instead of the bare state word; same mechanism
+   as the task token, purely presentational.
+6. **Tab-bar command widgets.** `tab_bar_right` runs a script on an
+   interval; a blocked-lane count or drift flag could stay permanently
+   visible. Trivial to add.
+7. **Custom command keybindings.** Popup scratch terminal, a lazygit popup
+   once lazygit is installed, and `plugin_action` bindings for the estate
+   plugin's actions.
+8. **Direct attach for remote check-ins.** `herdr agent attach <name>` from
+   any terminal, including over SSH, opens one lane without the full UI.
+   A habit rather than a setup.
+9. **Named test sessions.** Isolated scratch servers for experiments that
+   must not touch the live session; already part of the control skill's
+   safety rules, unused as a workflow.
+10. **Pane screen history — considered and declined.** It would replay pane
+    contents after a restart but persists terminal output (including
+    secrets) to disk; native Pi session resume already covers the restart
+    case, so the trade-off is not worth taking.
 
 ## Notes
 
