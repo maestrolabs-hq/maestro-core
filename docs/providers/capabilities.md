@@ -111,7 +111,7 @@ tools that are irrelevant or unsupported on this estate. As on every page in
 | `add_entity` | add a node/entity | record | single-provider |
 | `add_relationship` | add a directed edge | record | single-provider |
 | `run_reasoning` | forward-chaining IF/THEN rules over a node set | analyze | analyze |
-| `get_graph_analytics` | PageRank centrality and community detection | analyze | analyze |
+| `get_graph_analytics` | PageRank centrality and community detection (broken on 0.6.7: PageRank crash) | analyze | analyze |
 | `export_graph` | export the knowledge graph | maintain | single-provider |
 | `get_graph_summary` | high-level graph summary | status | status |
 | `query_graph` | get a node / traverse neighbours / keyword-search | query | query |
@@ -213,3 +213,16 @@ container-level index silently sweeps a built snapshot whose code is not on
 that does not exist. The provider-fanout skill's index template rejects these
 paths; keep provider ignore files (`.cgcignore`, `.cbmignore`) carrying
 `.maestro/`, `.superpowers/`, `.worktrees/`, `graphify-out/` as a second layer.
+
+## Validation notes (verified 2026-09-05)
+
+A live pass exercised every non-destructive tool; see `validation.md`. Corrections
+and defects found:
+
+- CGC `execute_cypher_query` takes `cypher_query` (not `query`).
+- Codebase-Memory `search_code` takes `pattern`; `trace_path` takes
+  `function_name`; `check_index_coverage` requires `paths` or `scopes`.
+- Graphify `query_graph` takes `question`; its stats report `links`, not `edges`.
+- Semantica `get_graph_analytics` is broken on 0.6.7 (PageRank crash);
+  `extract_entities` / `extract_relations` are naive; the graph is
+  containment-only (no derived semantic relations).
