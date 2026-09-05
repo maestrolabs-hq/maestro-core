@@ -111,7 +111,7 @@ tools that are irrelevant or unsupported on this estate. As on every page in
 | `add_entity` | add a node/entity | record | single-provider |
 | `add_relationship` | add a directed edge | record | single-provider |
 | `run_reasoning` | forward-chaining IF/THEN rules over a node set | analyze | analyze |
-| `get_graph_analytics` | PageRank centrality and community detection (broken on 0.6.7: PageRank crash) | analyze | analyze |
+| `get_graph_analytics` | PageRank centrality and community detection (works after two local hotfixes on 0.6.7; see `validation.md`) | analyze | analyze |
 | `export_graph` | export the knowledge graph | maintain | single-provider |
 | `get_graph_summary` | high-level graph summary | status | status |
 | `query_graph` | get a node / traverse neighbours / keyword-search | query | query |
@@ -223,9 +223,13 @@ and defects found:
 - Codebase-Memory `search_code` takes `pattern`; `trace_path` takes
   `function_name`; `check_index_coverage` requires `paths` or `scopes`.
 - Graphify `query_graph` takes `question`; its stats report `links`, not `edges`.
-- Semantica `get_graph_analytics` is broken on 0.6.7 (PageRank crash; local
-  venv hotfix applied, upstream-reportable). `extract_entities` /
-  `extract_relations` were naive only because no spaCy model was installed (a
-  wiring gap, since fixed — `en_core_web_md` + `en_core_web_sm` now live in the
-  tool venv and extraction is verified); see `semantica.md`, "Extraction
-  wiring".
+- Semantica `get_graph_analytics` needed TWO local venv hotfixes on 0.6.7 (a
+  PageRank `graph.nodes()` crash, and the MCP handler mis-sorting the
+  `{'centrality', 'rankings'}` result wrapper); with both applied it works
+  end-to-end (upstream-reportable; a reinstall wipes the patches).
+  `extract_entities` / `extract_relations` were naive only because no spaCy
+  model was installed (a wiring gap, since fixed — `en_core_web_md` +
+  `en_core_web_sm` now live in the tool venv, extraction is verified, and the
+  graph is enriched to 1,329 nodes / 4,570 edges including 1,070 entities).
+  spaCy-on-markdown precision stays limited (syntax mislabeled, mostly
+  `related_to`); see `semantica.md`, "Extraction wiring".

@@ -11,8 +11,10 @@ The query system is live across all seven providers; each returned real answers
 from the live-only indexes. Correlations are automatic wherever the provider
 supports them: CGC / CodeGraph / Codebase-Memory structural edges,
 Codebase-Memory semantic edges, Graphify communities and inferred edges, and
-MemPalace hallways and tunnels. Two defects remain, both in Semantica and both
-provider-side.
+MemPalace hallways and tunnels. Semantica's two apparent defects resolved as
+one wiring gap (missing spaCy model, since installed) and one genuine 0.6.7
+bug pair in `get_graph_analytics` (two local hotfixes applied;
+upstream-reportable).
 
 ## Per provider
 
@@ -50,23 +52,35 @@ Validated: `query_graph`, `god_nodes`, `graph_stats`, `read_confidence_audit`,
   for common labels. Global graph rebuilt from eight live sources; zero phantom
   symbols.
 
-### Semantica — query OK; analytics bug; extraction now wired
+### Semantica — wired and enriched; analytics fixed by two local hotfixes
 Validated: `query_graph`, `query_decisions`, `find_precedents`,
 `get_graph_summary`, `read_graph_summary`, `read_decisions`, `read_schema_info`,
-`extract_entities`, `extract_relations`, `run_reasoning`, `get_causal_chain`.
-- DEFECT: `get_graph_analytics` crashes ("PageRank calculation failed: 'dict'
-  object is not callable") — a 0.6.7 bug (PageRank calls `graph.nodes()` but
-  `ContextGraph.nodes` is a dict). A local venv hotfix addresses it; not
-  durable across reinstall, upstream-reportable.
+`extract_entities`, `extract_relations`, `run_reasoning`, `get_causal_chain`,
+`get_graph_analytics` (after the hotfixes below).
 - WIRING GAP (fixed): `extract_entities` / `extract_relations` returned naive
   output (`UNKNOWN` labels, generic `related_to`) because no spaCy model was
   installed — the extractor silently falls back to a pattern stub. With
   `en_core_web_md` + `en_core_web_sm` installed in the tool venv, extraction is
   verified producing real labels (PERSON/ORG/GPE) and dependency-based
   predicate relations. See `semantica.md`, "Extraction wiring".
-- The graph carries containment edges only (repository to file); no derived
-  semantic relations. `run_reasoning` needs `facts` + `rules`; `get_causal_chain`
-  needs a `decision_id` (none recorded).
+- ENRICHED: the graph was rebuilt through the extraction pipeline — 1,329
+  nodes (8 repository, 251 file, 1,070 entity) and 4,570 edges (`contains`
+  251, `mentions` 2,371, `related_to` 1,903, plus real predicates such as
+  `located_in`, `use`, `maintain`, `wire`). Entities are queryable via
+  `query_graph` search (for example `entity:NORP:herdr`).
+- `get_graph_analytics` took TWO local hotfixes: bug #1,
+  `_filter_nodes_by_labels` calls `graph.nodes()` but `ContextGraph.nodes` is
+  a dict ("'dict' object is not callable"); bug #2, the MCP handler sorts the
+  `{'centrality', 'rankings'}` result wrapper instead of the inner
+  `{node: score}` map ("'<' not supported between instances of 'dict' and
+  'list'"). With both applied the tool returns centrality end-to-end. Both are
+  site-packages patches a reinstall overwrites — upstream-reportable.
+- QUALITY: spaCy's newswire NER on markdown mislabels syntax (`Herdr` as
+  `NORP`, `##` as `MONEY`) and most relations are generic `related_to`. A
+  markdown-strip pre-pass or `method="llm"` through the local llama.cpp
+  endpoint would raise precision.
+- `run_reasoning` needs `facts` + `rules`; `get_causal_chain` needs a
+  `decision_id` (none recorded).
 
 ### MemPalace — OK (all memory kept)
 Validated: `status`, `search`, `kg_query`, `kg_stats`, `kg_timeline`,

@@ -113,7 +113,10 @@ This deployment was unwired until 2026-09-05. `en_core_web_md` (which carries
 vectors) and `en_core_web_sm` are now installed in the semantica uv tool venv,
 and extraction was verified producing real labels (PERSON/ORG/GPE) and
 dependency-based predicate relations. Pass `model="en_core_web_md"` explicitly;
-the extractor otherwise picks `_sm`.
+the extractor otherwise picks `_sm`. Precision stays bounded by spaCy's
+newswire training on markdown input — syntax gets mislabeled (`Herdr` as
+`NORP`, `##` as `MONEY`) and most extracted relations are generic
+`related_to`; a markdown-strip pre-pass or the LLM method below raises it.
 
 Two caveats on durability and setup:
 
@@ -121,10 +124,13 @@ Two caveats on durability and setup:
   wipes them. Install with `uv pip install --python <semantica tool venv
   python> <model wheel>` — `python -m spacy download` does not work in a uv
   tool environment.
-- `get_graph_analytics` fails on 0.6.7: PageRank calls `graph.nodes()` but
-  `ContextGraph.nodes` is a dict ("'dict' object is not callable"). A local
-  venv hotfix addresses it; the patch is not durable across reinstall and is
-  upstream-reportable.
+- `get_graph_analytics` fails on 0.6.7 for two reasons: PageRank calls
+  `graph.nodes()` but `ContextGraph.nodes` is a dict ("'dict' object is not
+  callable"), and the MCP handler sorts the `{'centrality', 'rankings'}`
+  result wrapper instead of the inner `{node: score}` map ("'<' not supported
+  between instances of 'dict' and 'list'"). Two local venv hotfixes address
+  them and the tool now returns centrality end-to-end; the patches are not
+  durable across reinstall and are upstream-reportable.
 
 Optional higher-quality extraction uses `method="llm"` through
 `OpenAIProvider(base_url=...)` pointed at the estate's local llama.cpp
