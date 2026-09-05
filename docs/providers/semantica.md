@@ -101,3 +101,36 @@ Semantica's JSON graph is not a ledger and does not replace Maestro durability.
 Keep inference and graph storage local by using the configured local provider
 and local graph path; remote model or graph backends are outside this
 integration.
+
+## Extraction wiring
+
+Entity and relation extraction requires a spaCy model. `NERExtractor` defaults
+to `method="ml"` and hard-defaults to `en_core_web_sm`; with no model installed
+it silently falls back to a naive pattern stub (entities labeled `UNKNOWN`,
+relations `related_to`). That fallback is a wiring gap, not a tool defect.
+
+This deployment was unwired until 2026-09-05. `en_core_web_md` (which carries
+vectors) and `en_core_web_sm` are now installed in the semantica uv tool venv,
+and extraction was verified producing real labels (PERSON/ORG/GPE) and
+dependency-based predicate relations. Pass `model="en_core_web_md"` explicitly;
+the extractor otherwise picks `_sm`.
+
+Two caveats on durability and setup:
+
+- The models live only in the tool venv; a `uv tool` reinstall of semantica
+  wipes them. Install with `uv pip install --python <semantica tool venv
+  python> <model wheel>` — `python -m spacy download` does not work in a uv
+  tool environment.
+- `get_graph_analytics` fails on 0.6.7: PageRank calls `graph.nodes()` but
+  `ContextGraph.nodes` is a dict ("'dict' object is not callable"). A local
+  venv hotfix addresses it; the patch is not durable across reinstall and is
+  upstream-reportable.
+
+Optional higher-quality extraction uses `method="llm"` through
+`OpenAIProvider(base_url=...)` pointed at the estate's local llama.cpp
+endpoint (`http://127.0.0.1:8080/v1`, model `qwen38-semantic`); it needs the
+`openai` package and a non-empty `OPENAI_API_KEY` (any value). The MCP
+`extract_entities`/`extract_relations` schemas do not forward `base_url`, so
+LLM extraction runs through the Python API or an `ExtractionConfig` file, not
+per-MCP-call. The embeddings stack (sentence-transformers, fastembed, torch)
+is already present and semantic search works.

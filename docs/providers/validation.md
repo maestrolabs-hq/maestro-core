@@ -50,14 +50,20 @@ Validated: `query_graph`, `god_nodes`, `graph_stats`, `read_confidence_audit`,
   for common labels. Global graph rebuilt from eight live sources; zero phantom
   symbols.
 
-### Semantica — query OK, two defects
+### Semantica — query OK; analytics bug; extraction now wired
 Validated: `query_graph`, `query_decisions`, `find_precedents`,
 `get_graph_summary`, `read_graph_summary`, `read_decisions`, `read_schema_info`,
 `extract_entities`, `extract_relations`, `run_reasoning`, `get_causal_chain`.
 - DEFECT: `get_graph_analytics` crashes ("PageRank calculation failed: 'dict'
-  object is not callable") — no centrality/community analytics on 0.6.7.
-- LIMITATION: `extract_entities` / `extract_relations` are naive (label content
-  `UNKNOWN`, emit generic `related_to`); not useful correlations.
+  object is not callable") — a 0.6.7 bug (PageRank calls `graph.nodes()` but
+  `ContextGraph.nodes` is a dict). A local venv hotfix addresses it; not
+  durable across reinstall, upstream-reportable.
+- WIRING GAP (fixed): `extract_entities` / `extract_relations` returned naive
+  output (`UNKNOWN` labels, generic `related_to`) because no spaCy model was
+  installed — the extractor silently falls back to a pattern stub. With
+  `en_core_web_md` + `en_core_web_sm` installed in the tool venv, extraction is
+  verified producing real labels (PERSON/ORG/GPE) and dependency-based
+  predicate relations. See `semantica.md`, "Extraction wiring".
 - The graph carries containment edges only (repository to file); no derived
   semantic relations. `run_reasoning` needs `facts` + `rules`; `get_causal_chain`
   needs a `decision_id` (none recorded).

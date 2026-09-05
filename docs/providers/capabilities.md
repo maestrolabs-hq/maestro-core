@@ -223,6 +223,9 @@ and defects found:
 - Codebase-Memory `search_code` takes `pattern`; `trace_path` takes
   `function_name`; `check_index_coverage` requires `paths` or `scopes`.
 - Graphify `query_graph` takes `question`; its stats report `links`, not `edges`.
-- Semantica `get_graph_analytics` is broken on 0.6.7 (PageRank crash);
-  `extract_entities` / `extract_relations` are naive; the graph is
-  containment-only (no derived semantic relations).
+- Semantica `get_graph_analytics` is broken on 0.6.7 (PageRank crash; local
+  venv hotfix applied, upstream-reportable). `extract_entities` /
+  `extract_relations` were naive only because no spaCy model was installed (a
+  wiring gap, since fixed — `en_core_web_md` + `en_core_web_sm` now live in the
+  tool venv and extraction is verified); see `semantica.md`, "Extraction
+  wiring".
