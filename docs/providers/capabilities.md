@@ -200,3 +200,16 @@ The provider-fanout skill's templates cover the five fanout verbs (query,
 index, status, validate, analyze); single-provider and out-of-scope tools are
 listed here for completeness and are used directly against the provider,
 never fanned out.
+
+## Indexing hygiene
+
+Every provider must be indexed only from a **live repo root** — a directory
+holding `.git`. Never index `<workspace>/.maestro/state/.staging` (built
+snapshots), `<workspace>/.superpowers/worktrees` (in-progress worktrees), or the
+workspace container directory itself. The container is not a git repository and
+the provider ignore files do not list `.maestro`/`.superpowers`, so a
+container-level index silently sweeps a built snapshot whose code is not on
+`main` — which makes CGC/Semantica/Codebase-Memory confidently describe software
+that does not exist. The provider-fanout skill's index template rejects these
+paths; keep provider ignore files (`.cgcignore`, `.cbmignore`) carrying
+`.maestro/`, `.superpowers/`, `.worktrees/`, `graphify-out/` as a second layer.
