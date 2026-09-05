@@ -1,19 +1,13 @@
 # CodeGraphContext (CGC)
 
-CGC maintains the workspace-context code graph — one of four independent
-repository graphs (the others are Graphify, CodeGraph, and Codebase-Memory).
-Identities, indexes, scores, and results are never merged.
+CGC 0.6.8 parses source with tree-sitter into an embedded structural graph.
+The inspected backend is KuzuDB; optional vector resolution is a separate
+model-loading path, not part of the verified deterministic fixture.
 
-## What it does and why Maestro uses it
-
-CGC parses source with tree-sitter (26 languages) into an embedded graph
-database and answers precise structural questions: who calls this function,
-which functions are dead, what is the cyclomatic complexity, what does a raw
-graph query return. Maestro uses it as the workspace-context source because
-those answers come from the AST itself — deterministic, no model involved —
-and keeping it independent from Graphify, CodeGraph, and Codebase-Memory gives
-four graph opinions that are never merged, so each can be trusted or replaced
-on its own.
+Identities, indexes, scores and results remain provider-local and are never
+merged. See [capabilities](capabilities.md) for every tool/schema disposition,
+[preparation](preparation.md) for ordered source hygiene, and
+[validation](validation.md) for runnable evidence and remaining gaps.
 
 ## Vocabulary mapping
 
@@ -27,20 +21,7 @@ on its own.
 | Cypher | the graph query language | graph query |
 | god nodes / hotspots | most-connected or riskiest entities | architectural report |
 
-## Identity
-
-| Field | Value |
-| --- | --- |
-| Package | `codegraphcontext` v0.6.8 (uv tool) |
-| CLIs | `cgc`, `codegraphcontext` |
-| Backend | Embedded KuzuDB (26 tree-sitter languages) |
-| Database | `<workspace>/.maestro/state/providers/cgc/kuzudb` |
-| Current contents | 40 files, 193 functions, 31 structs, 21 enums, 133 modules (691 graph nodes) |
-
-## Wiring
-
-The MCP server takes no CLI options; database selection uses environment
-variables with highest precedence:
+## Inspected wiring (not changed by this repair)
 
 ```json
 "cgc": {
@@ -53,57 +34,49 @@ variables with highest precedence:
 }
 ```
 
-Caveats: a long-running client caches the spawned server — restart the client
-(Pi `/reload`) after changing this wiring. Tool results arrive wrapped as JSON
-text in `result.content[0].text`; decode before reading fields. Tools that re-read source files from disk require the original repository path to remain available.
+## Scope and successful native workflow
 
-## Skills and Pi integration
+Direct DB: `<workspace>/.maestro/state/providers/cgc/kuzudb`. A tiny Python
+fixture independently produced `entry CALLS helper`, expected imports and exact
+source over native CLI and native stdio MCP. Ordinary update/delete/rename,
+watch/edit/query/unwatch and new exact-file exclusion removal worked in scratch.
+The 26-language catalog is availability, not measured language coverage.
 
-No provider-supplied Pi skill was identified in the installed distribution. No
-provider-specific Pi extension is installed. CGC is currently used through its
-native MCP server and native CLI.
+`add_code_to_graph({repo_path})` DOES index a new native MCP repository. A job id
+was followed by the exact new function source. An existing repository returns
+`success:false`/already indexed: a no-op, not refresh. Both populated job status
+handlers fail JSON serialization of `last_update_time`; a guarded 0.6.8 patch
+passes all native job-state regressions in scratch, **not deployed**.
+The earlier claim that only CLI works was a historical gateway failure, not a
+native limitation or a diagnosed gateway root cause. Live gateway remains
+untested; preserve original `error.data`, not just "Tool execution error".
 
-## CLI surface
+## Native operations and constraints
 
-| Command | Purpose |
-| --- | --- |
-| `cgc doctor` | Diagnostics (backend, parsers, permissions) |
-| `cgc --db kuzudb --db-path <p> stats` | Node counts by kind |
-| `cgc --db kuzudb --db-path <p> list` | Indexed repositories |
-| `cgc index / update / clean / delete` | Mutating provider-native operations |
-| `cgc report / diagram / visualize` | Reporting and rendering |
-| `cgc mcp start` | MCP server (stdio) |
+- `cgc --db kuzudb --path "$DB" index "$REPO" --summarize` creates an index;
+  `update "$REPO"` refreshes. Global flags precede the subcommand. Runtime
+  `CGC_RUNTIME_DB_TYPE` / `CGC_RUNTIME_DB_PATH` also select the CLI database.
+- `find_code` and most analyses accept `repo_path`; stats uses `repo_path`, not
+  the unsupported schema spelling `path`. Cypher uses `cypher_query`.
+- The tracked fanout's `cgcMode: "refresh-cli"` requires the selected existing
+  `cgcDbPath`, matching the follow-up MCP DB, and confirmed `cgcOwnerState`
+  (`unowned` or independently `released`). It runs update then a scoped source
+  probe; default `index-new` is not refresh. Helper ordering is mock-tested.
+- Kuzu's owner lock can block CLI while MCP holds it. Report blocked and seek
+  explicit maintenance permission; never automatically stop/restart services.
+- Root validation does not confine symlink targets. Native CGC indexed an
+  external file then left its outside-path symbol after removing the alias.
+  Shared preflight now rejects escapes before new writes; historical orphan
+  cleanup remains unimplemented and production refresh unapproved.
+- `.cgcignore` is provider-specific; it does not protect CBM or CodeGraph.
+  Versioning/deploying all eight untracked ignore files remains outstanding.
+- `generate_report` writes a file (default cwd/CGC_REPORT.md); tested content
+  was suggested Cypher, not a validated architecture report. Kuzu visualization
+  returns a localhost URL; browser/server correctness is untested.
+- Spring beans/datasource queries failed binder checks on a Python corpus.
+  Positive Java, dead-code validity, historical evolution, simulation quality,
+  bundles, package ingestion, context switching and other backends are untested.
 
-## MCP tools (29)
-
-| Tool | Description | Tested |
-| --- | --- | --- |
-| `add_code_to_graph` | Performs a one-time scan of a local folder to add its code to the graph. | skipped (mutating) |
-| `check_job_status` | Check the status and progress of a background job. | verified |
-| `list_jobs` | List all background jobs and their current status. | verified |
-| `find_code` | Find relevant code snippets related to a keyword (e.g., function name, class name, or content). | not exercised |
-| `analyze_code_relationships` | Analyze code relationships like 'who calls this function' or 'class hierarchy'. | not exercised |
-| `watch_directory` | Continuously monitors a directory and keeps graph updated. | skipped (mutating) |
-| `execute_cypher_query` | Run a read-only Cypher query against the code graph. | not exercised |
-| `add_package_to_graph` | Add a package to the graph. | skipped (mutating) |
-| `find_dead_code` | Find potentially unused functions. | not exercised |
-| `calculate_cyclomatic_complexity` | Calculate complexity of a function. | not exercised |
-| `find_most_complex_functions` | Find most complex functions. | not exercised |
-| `list_indexed_repositories` | List all indexed repositories. | not exercised |
-| `delete_repository` | DESTRUCTIVE AND IRREVERSIBLE. | skipped (destructive) |
-| `visualize_graph_query` | Generate a Neo4j visualization URL for a Cypher query. | not exercised |
-| `list_watched_paths` | List all watched directories. | verified |
-| `unwatch_directory` | Stop watching a directory. | skipped (mutating) |
-| `load_bundle` | Load a pre-indexed graph bundle (.cgc) into the database. | skipped (mutating) |
-| `search_registry_bundles` | Search registry bundles. | verified |
-| `get_repository_stats` | Get repository statistics. | not exercised |
-| `discover_codegraph_contexts` | Discover .codegraphcontext folders. | verified |
-| `switch_context` | Switch active graph context. | skipped (mutating) |
-| `list_graphs` | List all available graphs in the FalkorDB instance. | verified (reports unsupported) |
-| `generate_report` | Generate codegraph report. | not exercised |
-| `find_java_spring_endpoints` | Find Spring endpoints. | verified (empty on Rust corpus) |
-| `find_java_spring_beans` | Find Spring beans. | fails on non-Java corpus |
-| `find_datasource_nodes` | Query datasource nodes. | fails on non-Java corpus |
-| `simulate_metrics` | Calculate repository architectural metrics (coupling, cohesion, circular dependencies, complexity, and maintainability). | not exercised |
-| `simulate_architectural_change` | Simulate architectural modifications (service decomposition, adding/removing dependencies, deleting nodes) and compare metrics against the baseline. | not exercised |
-| `analyze_architectural_evolution` | Analyze repository growth trend and identify Technical Debt Hotspots (combining code complexity and Git commit churn). | not exercised |
+No provider-specific Pi extension is required. Use native CLI/MCP only after
+permission checks; installing parsers or returning counts does not certify
+current-source completeness.
