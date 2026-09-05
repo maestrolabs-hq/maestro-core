@@ -1,22 +1,13 @@
 # CodeGraph
 
-CodeGraph maintains one of four independent repository graphs (the others are
-CGC, Graphify, and Codebase-Memory) — built by a native Rust kernel and served
-from an in-repo SQLite database. Identities, indexes, scores, and results are
-never merged across providers.
+CodeGraph 1.6.0 (`@colbymchenry/codegraph`) uses a native Rust/tree-sitter
+extractor and per-project SQLite/FTS index. It returns grouped source and
+structural context through one default-listed MCP tool.
 
-## What it does and why Maestro uses it
-
-CodeGraph parses source with tree-sitter grammars compiled into a Rust kernel
-(20 languages compiled in, remaining languages and per-file fallbacks handled
-by the same extraction logic), storing symbols, edges, and files in a local
-SQLite database with FTS5 full-text search. A file watcher keeps the index
-current on every save, so a query never triggers its own indexing pass.
-Maestro uses it as one of four structural opinions, independent of CGC's
-embedded graph database, Graphify's portable JSON graph, and Codebase-Memory's
-SQLite index: CodeGraph's single MCP tool returns verbatim source grouped by
-file plus the call path and blast radius in one call, which is a different
-query shape from the other providers and is not merged with any of them.
+Identities, indexes, scores and results remain provider-local and are never
+merged. See [capabilities](capabilities.md) for every tool/schema disposition,
+[preparation](preparation.md) for ordered source hygiene, and
+[validation](validation.md) for runnable evidence and remaining gaps.
 
 ## Vocabulary mapping
 
@@ -31,17 +22,7 @@ query shape from the other providers and is not merged with any of them.
 | bundle install (into agents) | writing MCP config into other agents' own config files | no equivalent — not used, Maestro wires MCP itself |
 | PR dashboard / list / triage | GitHub pull-request tooling referenced in the CLI help | no equivalent — out of Maestro scope |
 
-## Identity
-
-| Field | Value |
-| --- | --- |
-| Package | `@colbymchenry/codegraph` **pinned 1.6.0** (npm, global install) |
-| CLI | `codegraph` |
-| Backend | SQLite + FTS5, native Rust kernel (tree-sitter) |
-| Database | `<workspace>/.maestro/state/providers/codegraph/codegraph.db`; the in-repo `.codegraph` directory is a filesystem symlink alias to this path, because the native index location is not configurable |
-| Current contents | 9 files, 31 nodes, 47 edges (`file`: 5, `function`: 15, `import`: 8, `variable`: 3); languages `rust`, `yaml` |
-
-## Wiring
+## Inspected wiring (not changed by this repair)
 
 ```json
 "codegraph": {
@@ -51,62 +32,62 @@ query shape from the other providers and is not merged with any of them.
 }
 ```
 
-The server resolves the project's `.codegraph/` index from `cwd` (or from a
-`projectPath` argument passed with a tool call); there is no separate
-served-graph configuration. The index is not auto-refreshed by the MCP
-server itself — the file watcher that keeps it current is provider-native and
-runs independently once the project has been initialized with `codegraph
-init`.
+## Scope and state
 
-## Skills and Pi integration
+The server chooses its project from cwd or explicit `projectPath`. Always pass
+`projectPath` when comparing another canonical repository. Only maestro-core's
+`.codegraph` was aliased to `<workspace>/.maestro/state/providers/codegraph` in
+the audit; the other seven stores were repository-local. `CODEGRAPH_DIR` accepts
+one directory-name segment, not an arbitrary external path. No relocation was
+performed or implied by these docs.
 
-No provider-supplied Pi skill was identified in the installed distribution.
-No provider-specific Pi extension is installed. CodeGraph ships its own agent
-guidance — a long usage-instructions string returned in the MCP `initialize`
-response, not a Pi skill file — and Claude-Code-specific skill files under its
-own repository that are not part of this installation. CodeGraph is used
-through its native MCP server and native CLI only.
+The server itself opens/watches the index and performs catch-up sync before
+serving tools. `--no-watch` does not suppress catch-up. CLI init is not proof of
+a permanent independent watcher and can install Git fallback hooks. A "read"
+can therefore cause startup writes; read-only audits must not start it blindly.
 
-## CLI surface
+## Verified native flow and failure boundaries
 
-| Command | Purpose |
-| --- | --- |
-| `codegraph init [--yes]` | Build the initial per-project index |
-| `codegraph sync` | Sync changes since the last index |
-| `codegraph status [--json]` | Index health: file/node/edge counts, pending changes |
-| `codegraph query <search>` | Symbol search by name |
-| `codegraph explore <query...>` | Same output as the `codegraph_explore` MCP tool |
-| `codegraph node / callers / callees / impact / files` | Structural queries; CLI equivalents of the unlisted MCP tools |
-| `codegraph serve --mcp` | MCP server (stdio) |
-| `codegraph uninit` | Remove the project's `.codegraph/` directory |
-| `codegraph install` / `uninstall` | Write or remove MCP config in other agents' own config files — not used; Maestro wires MCP itself |
-| `codegraph upgrade [--check]` | Update the CLI |
+Scratch init -> native explicit-project MCP query -> modify/delete/rename ->
+sync yielded the expected `entry calls helper`, then `renamed_entry calls
+helper`, exact new source, and removed old symbols. External-file symlinks
+were followed but their aliases were removed on sync; source preflight must
+reject escaping links before ingestion. Newly excluded sources were removed
+on refresh while unrelated symbols survived.
 
-## MCP tools (8; 1 listed by default)
+`codegraph sync "$REPO"` failing with `file is not a database` must stay failure.
+`sync || init` is incorrect: init only sees an initialized marker and can return
+0/Already initialized over corruption. The shared fanout selects init only for
+an absent DB, uses explicit cwd, and checks each exit separately. Supply
+`codegraphDir` from the verified MCP runtime selection, explicitly `.codegraph`
+for default or e.g. `.codegraph-win`. The helper validates one directory segment
+and pins CLI `CODEGRAPH_DIR` to it before testing that selected DB. It cannot
+inspect the MCP process environment; confirm that identity before approval.
+Default/alternate existing/absent/corrupt layouts were tested using native
+directory resolution and a recording/failing CLI double, not full native sync.
 
-Only `codegraph_explore` is listed by default — the provider's own guidance
-states that one strong tool steers an agent better than a menu of narrower
-ones. The other seven stay fully functional but unlisted unless the server is
-started with `CODEGRAPH_MCP_TOOLS=explore,node,search,callers,callees,impact,files,status`;
-everything they return already arrives inline on `codegraph_explore`. Maestro
-does not currently set that environment variable, so only the row below is
-reachable through the configured server.
+An initialized empty source corpus can legitimately report
+`fileCount:0,lastIndexed:null,index.state:complete`. Distinguish that from not
+indexed. Byte hashes of indexed source match only the represented files;
+unsupported docs/config and unresolved relationships remain coverage gaps.
 
-| Tool | Description | Tested |
-| --- | --- | --- |
-| `codegraph_explore` | Verbatim source of the relevant symbols grouped by file, plus the call path among them and a blast-radius summary, in one call. | verified |
-| `codegraph_search` (unlisted by default) | Quick symbol search by name; locations only, no code. | not exercised |
-| `codegraph_node` (unlisted by default) | Read a file with line numbers, or one symbol's source plus caller/callee trail. | not exercised |
-| `codegraph_callers` (unlisted by default) | List functions that call a given symbol. | not exercised |
-| `codegraph_callees` (unlisted by default) | List functions that a given symbol calls. | not exercised |
-| `codegraph_impact` (unlisted by default) | List symbols affected by changing a given symbol. | not exercised |
-| `codegraph_files` (unlisted by default) | Indexed file tree with language and symbol counts. | not exercised |
-| `codegraph_status` (unlisted by default) | Index health check: file/node/edge counts. | not exercised |
+## Query surfaces
 
-## Notes and limitations
+Gateway name is `codegraph_codegraph_explore({query,projectPath})`.
+Fanout treats formatted text as opaque returned data, never source evidence:
+query echoes can forge headings and fences. Even genuine source-looking output
+never yields `probe-matched`. Nonempty queries without `expectedEvidence.codegraph`
+yield `returned`; evidence-requesting queries and post-index probes remain
+`unconfirmed` until actual source verification outside the helper. Native
+`No relevant code found for ...` remains `complete-empty`; unindexed and error
+responses stay distinct. Raw text and tool metadata are preserved.
+Native `codegraph_status` can be called raw but is unlisted by default, so normal
+gateway discovery cannot route it. Seven narrower native tools can be listed
+with `CODEGRAPH_MCP_TOOLS`; do not expand that configuration without need.
 
-The index lags file writes by roughly one second through the watcher; a tool
-response can carry a staleness banner naming files edited since the last
-sync. This deployment is a single small repository (5 Rust source files plus
-CI/config files), so the measured index above is proportionate to that
-corpus, not a partial scan.
+CLI `status --json "$REPO"`, `sync "$REPO"`, `init --yes "$REPO"`, `explore`,
+`callers`, `callees`, `impact` and `affected` are useful native surfaces. Only
+the specific structural fixture above was verified end-to-end; broader language,
+framework/dynamic dispatch and impact accuracy remain untested. No model-based
+inference was found in the inspected structural route; this does not authorize
+an install/self-heal download if the native bundle is missing.
